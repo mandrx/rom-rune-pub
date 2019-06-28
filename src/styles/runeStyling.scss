@@ -1,0 +1,830 @@
+@import "./breakpoint.scss";
+@import "./animation.scss";
+
+//$ui-color-dark-1: #35414c;
+$ui-color-dark-1: #3f4c58;
+$color-red: #f5222d;
+$primary-color: #e91e63;
+$popover-text-1: white;
+$rune-point-color-0: #009688;
+$rune-point-color-1: #ffeb3b; // #26c6da;
+$rune-point-color-2: #e91e63; // #8bc34a; // 7ad3ff
+$rune-point-color-3: #ffc107; // #f06292;
+$rune-point-color-4: #adaeaf; // #ff9800;
+$rune-point-color-white: #ffffff; // #ff9800;
+$cost-summary-1: #eaa510; // #ff9800;
+$cost-summary-2: #ffc107; // #ff9800;
+
+$rune-active-color-1: #2196f3;
+$rune-active-color-2: #74c70d;
+$rune-active-color-3: #ff5490;
+$rune-active-color-4: #f3a100;
+$rune-active-color-5: #8321f3;
+
+$side-tab-title-bg-1: #ffd052;
+$side-tab-title-text-1: #bb3207;
+
+$break-xs: "480px";
+$break-sm: "768px";
+$break-md: "992px";
+$break-lg: "1200px";
+$break-xl: "1600px";
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background-color: #f5f5f566;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0);
+  border: 0;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: rgba($rune-point-color-4, 0.4);
+  //background-color: red;
+  border: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba($rune-point-color-4, 0.8);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: rgba($rune-point-color-4, 0.8);
+}
+
+body {
+  .ant-layout.ant-layout-has-sider > .ant-layout,
+  .ant-layout.ant-layout-has-sider > .ant-layout-content {
+    overflow: hidden;
+  }
+
+  .ant-modal.share-link-modal {
+    max-width: 90vw;
+    .ant-input-lg {
+      padding: 20px 10px;
+    }
+    .ant-input-group .ant-input-group-addon:last-child {
+      padding: 0;
+      border: 0;
+      button {
+        border-radius: 0 4px 4px 0;
+      }
+    }
+  }
+
+  background: #f5f5f5;
+  .App {
+    transition: opacity 0.3s ease-in-out;
+  }
+  .btn-activate {
+    color: #fff;
+    background-color: #9ebf17;
+    border: 0px;
+    &:hover,
+    &:focus {
+      color: #fff;
+      background-color: #a5c32a;
+    }
+    &:active,
+    &.active {
+      color: #fff;
+      background-color: #009688;
+    }
+  }
+  .btn-reset {
+    color: #fff;
+    background-color: #f44336;
+    border: 0px;
+    &:hover,
+    &:focus {
+      color: #fff;
+      background-color: #ee544a;
+    }
+    &:active,
+    &.active {
+      color: #fff;
+      background-color: #009688;
+    }
+  }
+
+  .job-selection {
+    //margin-right: 32px;
+    @include media("<sm") {
+      margin-right: 0;
+    }
+  }
+  .job-tier-selection {
+  }
+
+  .floating-zoom {
+    position: fixed;
+    z-index: 999;
+    right: 20px;
+    margin-top: 16px;
+
+    .ant-btn:not(.ant-btn-circle):not(.ant-btn-circle-outline).ant-btn-icon-only {
+      padding: 0px 15px;
+    }
+  }
+}
+.ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected,
+.ant-menu.ant-menu-dark .ant-menu-item-selected {
+  background-color: $primary-color;
+}
+.desc-style-1 {
+  color: #13e4ff;
+}
+.desc-style-2 {
+  color: #ffc107;
+}
+.desc-style-3 {
+  color: #8df936;
+  .desc-style-2 {
+    color: #8df936;
+  }
+}
+.desc-style-4 {
+  color: #ffeb3b;
+}
+
+.ant-typography strong {
+  //font-weight: 800;
+  //color: $color-red;
+  color: $primary-color;
+}
+/*[role="tooltip"] {
+  pointer-events: none;
+}*/
+.muted {
+  cursor: not-allowed !important;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+.cost-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-size: contain;
+  background-position: bottom right;
+  vertical-align: -5px;
+  text-align: center;
+  margin-right: 4px;
+}
+.icon-contribution {
+  background-repeat: no-repeat;
+  background-image: url("/images/contribution.png");
+}
+.icon-medal {
+  background-repeat: no-repeat;
+  background-image: url("/images/goldmedal.png");
+}
+.ant-radio-group {
+  &.radio-vertical {
+    .ant-radio-button-wrapper {
+      display: block;
+      border-top-width: 0px;
+      border-left: 1px solid #d9d9d9;
+      transition: color 0.3s, background 0.3s, border-color 0.3s,
+        box-shadow 0.3s;
+    }
+    .ant-radio-button-wrapper-checked {
+      border-color: $primary-color;
+      box-shadow: 0 -1px 0 0 $primary-color;
+    }
+    .ant-radio-button-wrapper-checked:hover {
+      border-color: lighten($primary-color, 10);
+      box-shadow: 0 -1px 0 0 lighten($primary-color, 10);
+    }
+    .ant-radio-button-wrapper:first-child {
+      border-radius: 4px 4px 0 0;
+      border-top-width: 1px;
+    }
+    .ant-radio-button-wrapper:last-child {
+      border-top-width: 0px;
+      border-radius: 0 0 4px 4px;
+    }
+  }
+}
+
+.ant-layout {
+  //background-color: #e5e8ed;
+  background-color: #fff;
+
+  .rune-viewport {
+    background-color: #f1f3f5;
+    transition: background-color 0.5s ease-in-out;
+    .rune-simulator-wrapper {
+      overflow: hidden;
+    }
+  }
+
+  .panel-greyout {
+    @include media("<md") {
+      pointer-events: none;
+      background-color: #e7e7e7;
+      > * {
+        opacity: 0.2;
+      }
+      .rune-viewport {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .panel-content {
+    transition: background-color 0.3s ease-in-out;
+    > * {
+      transition: opacity 0.3s ease-in-out;
+    }
+    .top-cost-summary {
+      background-color: $cost-summary-2;
+      display: none;
+      @include media("<lg") {
+        display: block;
+      }
+    }
+    .top-panel-bar {
+      padding: 14px 20px;
+      @include media("<lg") {
+        padding: 4px 20px;
+      }
+      &.top-control-container {
+        border-bottom: 12px solid white;
+        min-height: 90px;
+        overflow: auto;
+        transition: 0.2s min-height ease-in-out;
+        @include media("<lg") {
+          min-height: 55px;
+          padding-top: 10px;
+          padding-bottom: 0px;
+          .ant-typography {
+            display: none;
+          }
+        }
+        .hide-on-close {
+          display: block;
+          @include media("<lg") {
+            display: none;
+          }
+        }
+        .ant-select-selection--multiple {
+          max-height: 42px;
+          overflow: hidden;
+        }
+        &.is-open {
+          min-height: 92px;
+          @include media("<lg") {
+            min-height: 160px;
+          }
+          @include media("<md") {
+            min-height: 220px;
+          }
+          .ant-typography {
+            display: block;
+          }
+          .ant-select-selection--multiple {
+            max-height: unset;
+          }
+          .hide-on-close {
+            display: block;
+          }
+        }
+      }
+
+      .ant-col {
+        text-align: left;
+        .ant-typography {
+          margin-bottom: 3px;
+          //display: block;
+          @include media("<sm") {
+            margin-top: 4px;
+            margin-bottom: 0px;
+          }
+        }
+      }
+      .cost-summary {
+        .ant-col {
+          text-align: center;
+        }
+        .cost-value,
+        .cost-name {
+          display: inline-block;
+          //color: #fff;
+          //text-shadow: #694800 1px 1px 2px;
+        }
+        .cost-name {
+          @include media("<xs") {
+            display: none;
+          }
+        }
+        .cost-value {
+          margin-right: 6px;
+        }
+      }
+    }
+    .top-control-toggle {
+      z-index: 1000;
+      box-shadow: 0px 2px 2px 1px #a2a2a226;
+      position: absolute;
+      margin-top: -12.5px;
+      background-color: white;
+      padding: 4px 10px;
+      padding-top: 0px;
+      border-radius: 20px;
+      @include media(">lg") {
+        display: none;
+      }
+
+      .openCloseIcon {
+        transition: 0.2s transform ease-in-out;
+        transform: rotate(180deg);
+      }
+      &.is-open {
+        .openCloseIcon {
+          transform: rotate(0deg);
+        }
+      }
+    }
+  }
+
+  .ant-layout-header {
+    height: 65px;
+    //line-height: 65px;
+    @include media("<lg") {
+      height: 44px;
+    }
+  }
+
+  .fluid-header {
+    @include media("<lg") {
+      height: 44px;
+    }
+    .top-menu {
+      line-height: 65px;
+      @include media("<lg") {
+        line-height: 44px;
+      }
+    }
+  }
+
+  .ant-layout-sider {
+    z-index: 1000;
+    transition: all 0.2s ease-in-out;
+    .side-close {
+      position: absolute;
+      z-index: 99;
+      right: 0px;
+      button{
+        border-radius: 0;
+        border-bottom-left-radius: 100%;
+        padding: 0px;
+        padding-right: 3px;
+        padding-bottom: 10px;
+        padding-left: 15px;
+        background-color: #e07722;
+        border: 0;
+        color: #fff;
+        
+        &:hover{
+          background-color: #ea4c46;          
+        }
+      }
+    }
+    .cost-icon {
+      width: 30px;
+      height: 30px;
+      vertical-align: -4px;
+      margin-right: 8px;
+    }
+    .cost-summary {
+      .cost-value {
+        background-color: $cost-summary-1;
+        text-shadow: 1px 1px 1px #0000006b;
+        font-weight: bold;
+        padding: 28px 0;
+        color: white;
+        font-size: 24px;
+      }
+      .cost-name {
+        display: none;
+        background-color: $cost-summary-2;
+        padding: 8px 0;
+        color: #00000085;
+      }
+    }
+
+    .side-tab {
+      .ant-tabs-nav-wrap {
+        background-color: $side-tab-title-bg-1;
+        .ant-tabs-nav {
+          padding: 4px 0;
+          .ant-tabs-tab:hover {
+            color: lighten($color: $side-tab-title-text-1, $amount: 10%);
+          }
+          .ant-tabs-tab-active {
+            color: $side-tab-title-text-1;
+          }
+          .ant-tabs-tab-active:hover {
+            //color: lighten($color: $side-tab-title-text-1, $amount: 10%);
+          }
+        }
+        .ant-tabs-ink-bar {
+          background-color: $side-tab-title-text-1;
+          height: 3px;
+        }
+      }
+      .side-tab-content {
+        padding: 0 20px;
+        @include media("<md") {
+          padding: 0 20px;
+        }
+        .ant-empty {
+          margin-top: 50px;
+        }
+
+        .ant-descriptions {
+          margin-bottom: 20px;
+
+          .ant-descriptions-title {
+            color: $primary-color;
+            margin-bottom: 5px;
+            font-weight: 600;
+          }
+          .ant-descriptions-item-label {
+            max-width: 254px;
+          }
+          span.stat-property-text {
+            float: left;
+            max-width: 180px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
+          .ant-descriptions-item-content {
+            color: $rune-active-color-1;
+            color: $side-tab-title-text-1;
+          }
+          &.special {
+            span.stat-property-text {
+              max-width: 200px;
+            }
+            .ant-descriptions-item-label {
+              max-width: 214px;
+            }
+            .ant-descriptions-item-content {
+              color: #719c98;
+              .all-runes {
+                color: $rune-point-color-0;
+                font-weight: 600;
+              }
+            }
+          }
+          .ant-badge {
+            float: right;
+            .ant-badge-count {
+              pointer-events: none;
+              //background-color: #607d8bb0;
+              background-color: #fff;
+              color: #009688;
+              border: #00968830 1px solid;
+              font-size: 0.85em;
+              line-height: 1.6em;
+            }
+          }
+          .ant-descriptions-item-label:last-child,
+          .ant-descriptions-item-content:last-child {
+            text-align: right;
+          }
+        }
+        .side-control-item {
+          margin-bottom: 20px;
+        }
+      }
+    }
+  }
+  .ant-menu {
+    .ant-menu-inline .ant-menu-item {
+      transition: 0.3s opacity ease-in-out;
+      opacity: 1;
+    }
+    .ant-menu-submenu > .ant-menu-submenu-title {
+      .submenu-title {
+        .submenu-title-text {
+          transition: 0.3s opacity ease-in-out;
+          opacity: 1;
+        }
+      }
+    }
+    &.ant-menu-inline-collapsed {
+      .ant-menu-inline .ant-menu-item {
+        opacity: 0;
+      }
+      > .ant-menu-submenu > .ant-menu-submenu-title {
+        padding: 0 18px !important;
+        .submenu-title {
+          .submenu-title-text {
+            opacity: 0;
+          }
+        }
+      }
+    }
+  }
+  .ant-layout-sider {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+} //Body END
+
+.ant-select-dropdown * {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+.rune-simulator-container {
+  position: relative;
+  transition: opacity 300ms ease-in-out;
+
+  .rune-simulator {
+    transition: 150ms ease;
+    width: 100%;
+    position: relative;
+
+    .linkContainer {
+      position: absolute;
+      top: 13px;
+      width: 0;
+      height: 0;
+      svg.rune-links {
+        overflow: visible;
+
+        .linkLine {
+          stroke: #d1d8d7; //#8a9e9b5c;
+          stroke-linecap: round;
+          stroke-width: 5;
+          position: relative;
+          &:hover {
+            stroke: darken(#d1d8d7, 10);
+          }
+          &[data-active="true"] {
+            stroke: $rune-point-color-2;
+            stroke-width: 8;
+            &:hover {
+              stroke: darken($rune-point-color-2, 10);
+            }
+          }
+        }
+      }
+    }
+    .pointContainer {
+      position: absolute;
+      top: 0px;
+      margin-left: -21px;
+      margin-top: -8px;
+      width: 0;
+      height: 0;
+
+      .runepoint {
+        user-select: none;
+        position: absolute;
+        overflow: visible;
+        width: 42px;
+        height: 42px;
+        cursor: pointer;
+
+        &::after {
+          display: block;
+          content: "";
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          transform: scale(0.5);
+          background-color: $rune-point-color-white;
+          border: 8px solid $rune-point-color-4;
+        }
+        &[data-active="true"] {
+          &::after {
+            background-color: $rune-point-color-white;
+            border: 8px solid $rune-point-color-2;
+          }
+          &:hover::after {
+            transform: scale(0.8);
+            box-shadow: #e91e63 0px 0px 8px 4px;
+            background-color: #e91e63;
+            border: 6px solid #fff;
+          }
+        }
+        &[data-special="true"] {
+          &::after {
+            transform: scale(0.65);
+            border: 7px solid $rune-point-color-4;
+            background-color: $rune-point-color-1;
+          }
+          &:hover::after {
+            box-shadow: #ff9800 0px 0px 8px 4px;
+            background-color: #fbc02d;
+            border: 6px solid #fff;
+          }
+          &[data-active="true"] {
+            &::after {
+              border: 7px solid $rune-point-color-2;
+              background-color: $rune-point-color-3;
+              transform: scale(0.9);
+            }
+            &:hover::after {
+              transform: scale(1);
+              box-shadow: #e91e63 0px 0px 8px 4px;
+              background-color: #e91e63;
+              border: 5px solid #ffeb3b;
+            }
+          }
+        }
+        &:hover {
+          &::after {
+            transform: scale(0.8);
+            box-shadow: #b9b9b9 0px 0px 8px 4px;
+            background-color: #c7c7c7;
+            border: 6px solid #fff;
+          }
+        }
+        &.startingPoint::before {
+          display: block;
+          position: absolute;
+          content: "";
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          transform: scale(1);
+          border: 8px solid #024175;
+          background-color: #024175;
+          -webkit-animation: ping 1s infinite;
+          animation: ping 1s infinite;
+          opacity: 0;
+        }
+        &.startingPoint::after {
+          //background-color: $rune-point-color-1;
+          background-color: #8ef7f6;
+          border: 8px solid $rune-point-color-0;
+          transform: scale(1);
+        }
+        &[data-highlight="1"],
+        &[data-highlight="2"],
+        &[data-highlight="3"],
+        &[data-highlight="4"],
+        &[data-highlight="5"] {
+          border-radius: 50%;
+          border: 5px solid;
+          /*
+          &::before {
+            display: block;
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: scale(1);
+            //border: 8px solid #2196f3;
+            //animation: ping 1s infinite;
+            opacity: 0;
+          }
+          */
+        }
+        &[data-highlight="1"] {
+          &::before {
+            //border: 8px solid $rune-active-color-1;
+          }
+          //box-shadow: #2195f3ba 0px 0px 0px 6px;
+          border-color: $rune-active-color-1;
+        }
+        &[data-highlight="2"] {
+          //box-shadow: $rune-active-color-2 0px 0px 0px 6px;
+          border-color: $rune-active-color-2;
+        }
+        &[data-highlight="3"] {
+          //box-shadow: $rune-active-color-3 0px 0px 0px 6px;
+          border-color: $rune-active-color-3;
+        }
+        &[data-highlight="4"] {
+          //box-shadow: $rune-active-color-4 0px 0px 0px 6px;
+          border-color: $rune-active-color-4;
+        }
+        &[data-highlight="5"] {
+          //box-shadow: $rune-active-color-5 0px 0px 0px 6px;
+          border-color: $rune-active-color-5;
+        }
+      }
+    }
+  }
+
+  .rune-simulator[data-tier="20000"] {
+    [data-tier="20000"] {
+      opacity: 1;
+    }
+    [data-tier="30000"],
+    [data-tier="40000"],
+    [data-tier="45003"] {
+      opacity: 0.15;
+      cursor: no-drop;
+    }
+  }
+  .rune-simulator[data-tier="30000"] {
+    [data-tier="20000"],
+    [data-tier="30000"] {
+      opacity: 1;
+    }
+    [data-tier="40000"],
+    [data-tier="45003"] {
+      opacity: 0.15;
+      cursor: no-drop;
+    }
+  }
+  .rune-simulator[data-tier="40000"] {
+    [data-tier="20000"],
+    [data-tier="30000"],
+    [data-tier="40000"] {
+      opacity: 1;
+    }
+    [data-tier="45003"] {
+      opacity: 0.15;
+      cursor: no-drop;
+    }
+  }
+  .rune-simulator[data-tier="45003"] {
+    [data-tier="20000"],
+    [data-tier="30000"],
+    [data-tier="40000"],
+    [data-tier="45003"] {
+      opacity: 1;
+    }
+  }
+}
+.ant-popover {
+  color: $popover-text-1;
+  .ant-popover-content > .ant-popover-arrow {
+    border-color: $ui-color-dark-1 !important;
+  }
+  .ant-popover-inner {
+    color: $popover-text-1;
+    background-color: $ui-color-dark-1;
+    max-width: 300px;
+    user-select: none;
+    .ant-popover-title {
+      color: #cddc39; //$popover-text-1;
+      border-bottom-color: lighten($ui-color-dark-1, 8);
+    }
+    .ant-popover-inner-content {
+      color: $popover-text-1;
+      hr {
+        border: 0;
+        border-top: lighten($ui-color-dark-1, 8) 1px solid;
+      }
+      .rune-reset {
+        color: #ffc107;
+      }
+      .rune-unavaliable {
+        color: #b0bec5;
+      }
+      .text-low-tier {
+        color: #ffc107;
+      }
+      .rune-cost {
+        margin-top: 8px;
+        padding: 5px 0;
+        text-align: center;
+        border-top: lighten($ui-color-dark-1, 8) 1px solid;
+
+        .cost-medal {
+          margin: 0px 8px;
+        }
+
+        .desc-icon {
+          height: 24px;
+          width: 24px;
+          display: inline-block;
+          margin-right: 5px;
+          vertical-align: middle;
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position-x: right;
+        }
+      }
+    }
+  }
+}
+.draggable {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+.draggable:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}

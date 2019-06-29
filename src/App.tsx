@@ -48,6 +48,7 @@ class App extends React.PureComponent {
   private baseHeight = 3000; //2970;
   private baseWidth = 3800;
   private shareKey = "";
+  private runeSimulator?: RuneSimulator;
 
   state = {
     zoomScale: 1,
@@ -77,6 +78,7 @@ class App extends React.PureComponent {
         : this.defaultCost
     );
     const urlData = getDecodeUrlData();
+
     console.log("urlData", urlData);
 
     this.shareKey = urlData.shareKey;
@@ -98,12 +100,19 @@ class App extends React.PureComponent {
     this.state.tier = tier;
     this.state.costType = costType;
   }
+  private firstInit = false;
 
   componentDidMount() {
     const runeSimulator = this.refs.runeSimulator as RuneSimulator;
     runeSimulator.loadJobRuneData(this.state.jobId);
     runeSimulator.changeCostType(this.state.costType);
     runeSimulator.activateRuneFromShareKey(this.shareKey);
+    this.runeSimulator = runeSimulator;
+
+    if (!this.firstInit) {
+      document.addEventListener("keydown", this.handleKeyDown);
+      this.firstInit = true;
+    }
   }
 
   handleJobChange = (value: any) => {
@@ -111,7 +120,8 @@ class App extends React.PureComponent {
     this.setState({
       jobId: value
     });
-    (this.refs.runeSimulator as RuneSimulator).loadJobRuneData(value);
+    this.runeSimulator!.loadJobRuneData(value);
+    (this.refs.runeSearch as RuneSearch).clearSelection();
   };
 
   handleJobTierChange = (e: any) => {
@@ -120,14 +130,14 @@ class App extends React.PureComponent {
     this.setState({
       tier: value
     });
-    (this.refs.runeSimulator as RuneSimulator).changeTier(value);
+    this.runeSimulator!.changeTier(value);
   };
 
   handleCostTypeChange = (e: any) => {
     let value = e.target.value;
     localStorage.setItem("costType", value);
     this.setState({ costType: value });
-    (this.refs.runeSimulator as RuneSimulator).changeCostType(value);
+    this.runeSimulator!.changeCostType(value);
   };
 
   setCost = (cost: any) => {
@@ -159,22 +169,33 @@ class App extends React.PureComponent {
     });
   };
 
+  handleKeyDown = (e: any) => {
+    if (e.ctrlKey) {
+      switch (e.key) {
+        case "z":
+          this.runeSimulator!.undo();
+          break;
+        case "y":
+          this.runeSimulator!.redo();
+          break;
+      }
+    }
+  };
+
   handleSelectAll = (e: any) => {
-    (this.refs.runeSimulator as RuneSimulator).selectAllRune();
+    this.runeSimulator!.selectAllRune();
   };
 
   handleResetRune = (e: any) => {
-    (this.refs.runeSimulator as RuneSimulator).resetRune();
+    this.runeSimulator!.resetRune();
   };
 
-  handleZoomInClick = (e: any) =>
-    (this.refs.runeSimulator as RuneSimulator).zoomIn();
+  handleZoomInClick = (e: any) => this.runeSimulator!.zoomIn();
 
-  handleZoomOutClick = (e: any) =>
-    (this.refs.runeSimulator as RuneSimulator).zoomOut();
+  handleZoomOutClick = (e: any) => this.runeSimulator!.zoomOut();
 
   handleResetViewClick = (e: any) => {
-    (this.refs.runeSimulator as RuneSimulator).zoomReset();
+    this.runeSimulator!.zoomReset();
     setTimeout(() => {
       this.viewportTo();
     }, 500);
@@ -209,8 +230,26 @@ class App extends React.PureComponent {
     }, 300);
   };
 
-  handleRuneSearchChange = (id: any) =>
-    (this.refs.runeSimulator as RuneSimulator).highlightRune(id);
+  handleRuneSearchChange = (id: any) => {
+    const setHeight = () => {
+      /*const runeBoxHeight = $(".rune-search-box .ant-select").height();
+      $(".top-control-container").css("minHeight","max-content");
+      $(".top-control-container.is-open").css(
+        "minHeight",
+        Math.ceil(runeBoxHeight! + 49)
+      );*/
+    };
+    
+    // There is slight animation delay. Wait till animation ends.
+    setTimeout(() => {
+      setHeight();
+    }, 600);
+
+    // Set instantly for smoother adding transition
+    setHeight();
+
+    this.runeSimulator!.highlightRune(id);
+  };
 
   blurInput = (e: any) => (document.activeElement as any).blur();
 
@@ -241,8 +280,7 @@ class App extends React.PureComponent {
   };
 
   handleShareURL = (e: any) => {
-    const shareUrl = (this.refs
-      .runeSimulator as RuneSimulator).generateShareKey();
+    const shareUrl = this.runeSimulator!.generateShareKey();
     this.setState({
       showShareModal: true
     });
@@ -470,6 +508,7 @@ class App extends React.PureComponent {
                           Search
                         </Text>
                         <RuneSearch
+                          ref="runeSearch"
                           lang={this.state.lang}
                           runeNameList={this.state.runeNameList}
                           onChange={this.handleRuneSearchChange}
@@ -502,10 +541,37 @@ class App extends React.PureComponent {
                       />
                     </Col>
                   </Row>
-                  <Row type="flex" justify="end">
+                  <Row type="flex" justify="space-between">
+                    <Col>
+                      <div className="floating-history">
+                        <ButtonGroup size={isMobile ? "default" : "large"}>
+                          <Tooltip
+                            title={`Undo ${!isMobile ? "(Ctrl + Z)" : ""}`}
+                          >
+                            <Button
+                              icon="undo"
+                              onClick={e => {
+                                this.runeSimulator!.undo();
+                              }}
+                            />
+                          </Tooltip>
+
+                          <Tooltip
+                            title={`Redo ${!isMobile ? "(Ctrl + Y)" : ""}`}
+                          >
+                            <Button
+                              icon="redo"
+                              onClick={e => {
+                                this.runeSimulator!.redo();
+                              }}
+                            />
+                          </Tooltip>
+                        </ButtonGroup>
+                      </div>
+                    </Col>
                     <Col>
                       <div className="floating-zoom">
-                        <ButtonGroup size="large">
+                        <ButtonGroup size={isMobile ? "default" : "large"}>
                           <Tooltip title="Zoom in">
                             <Button
                               icon="zoom-in"

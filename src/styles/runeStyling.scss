@@ -120,15 +120,27 @@ body {
   .job-tier-selection {
   }
 
-  .floating-zoom {
-    position: fixed;
+  .floating-zoom,
+  .floating-history {
+    position: absolute;
     z-index: 999;
-    right: 20px;
     margin-top: 16px;
+    min-width: 150px;
 
     .ant-btn:not(.ant-btn-circle):not(.ant-btn-circle-outline).ant-btn-icon-only {
-      padding: 0px 15px;
+      padding: 0px 12px;
+      @include media("<sm") {
+        padding: 0px 8px;
+      }
     }
+  }
+  .floating-zoom {
+    text-align: right;
+    right: 20px;
+  }
+  .floating-history {
+    text-align: left;
+    left: 20px;
   }
 }
 .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected,
@@ -250,16 +262,19 @@ body {
     }
     .top-panel-bar {
       padding: 14px 20px;
+      padding-bottom: 4px;
       @include media("<lg") {
         padding: 4px 20px;
       }
       &.top-control-container {
         border-bottom: 12px solid white;
-        min-height: 90px;
+        //min-height: 90px;
+        min-height: max-content;
         overflow: auto;
         transition: 0.2s min-height ease-in-out;
         @include media("<lg") {
-          min-height: 55px;
+          //min-height: 55px;
+          //min-height: max-content;
           padding-top: 10px;
           padding-bottom: 0px;
           .ant-typography {
@@ -274,21 +289,24 @@ body {
         }
         .ant-select-selection--multiple {
           max-height: 42px;
-          overflow: hidden;
+          overflow: auto;
         }
         &.is-open {
-          min-height: 92px;
+          //min-height: 92px;
+          min-height: max-content;
+          /*
           @include media("<lg") {
             min-height: 160px;
           }
           @include media("<md") {
             min-height: 220px;
           }
+          */
           .ant-typography {
             display: block;
           }
           .ant-select-selection--multiple {
-            max-height: unset;
+            max-height: 92px;
           }
           .hide-on-close {
             display: block;
@@ -379,7 +397,7 @@ body {
       position: absolute;
       z-index: 99;
       right: 0px;
-      button{
+      button {
         border-radius: 0;
         border-bottom-left-radius: 100%;
         padding: 0px;
@@ -389,9 +407,9 @@ body {
         background-color: #e07722;
         border: 0;
         color: #fff;
-        
-        &:hover{
-          background-color: #ea4c46;          
+
+        &:hover {
+          background-color: #ea4c46;
         }
       }
     }
@@ -673,6 +691,14 @@ body {
           border: 8px solid $rune-point-color-0;
           transform: scale(1);
         }
+
+        /*
+        &[data-highlight="1"]:not([data-active="true"]),
+        &[data-highlight="2"]:not([data-active="true"]),
+        &[data-highlight="3"]:not([data-active="true"]),
+        &[data-highlight="4"]:not([data-active="true"]),
+        &[data-highlight="5"]:not([data-active="true"]) {
+          */
         &[data-highlight="1"],
         &[data-highlight="2"],
         &[data-highlight="3"],

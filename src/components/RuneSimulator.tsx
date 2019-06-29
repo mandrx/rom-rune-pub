@@ -1,6 +1,12 @@
 import * as React from "react";
 import { message } from "antd";
-import { uniquePush, getPropertyLang, array_sum } from "../Utils";
+import {
+  uniquePush,
+  getPropertyLang,
+  array_sum,
+  mergeArray,
+  filterDifferentArray
+} from "../Utils";
 import localForage from "localforage";
 import { RuneCostType, JobID } from "../AppInterfaces";
 import $ from "jquery";
@@ -9,6 +15,7 @@ import RunePoint from "./RunePoint";
 import { isMobile } from "react-device-detect";
 import LZString from "lz-string";
 import { updateUrlShareKey } from "../UrlManager";
+import { RuneHistory } from "../RuneHistory";
 
 export enum ROMJob {
   Job11 = "knight",
@@ -80,6 +87,7 @@ export class RuneSimulator extends React.PureComponent<
   private basicDataLoaded = false;
   private jobDataLoaded = false;
   private runeNameTables: any = [];
+  public History: RuneHistory = new RuneHistory();
 
   state = {
     runeDataLoaded: false
@@ -122,7 +130,7 @@ export class RuneSimulator extends React.PureComponent<
         });
 
         this.activeRunes = activateArr;
-        this.updateRunePointDOM();
+        this.updateRunePointDOM(false, false);
       }
     }
   }
@@ -299,6 +307,35 @@ export class RuneSimulator extends React.PureComponent<
     console.log(`Render time(${note}): ${tEnd}ms...`);
   };
 
+  undo = () => {
+    let toState = this.History.undoState();
+    this.loadHistoryState(toState, "undo");
+  };
+
+  redo = () => {
+    let toState = this.History.redoState();
+    this.loadHistoryState(toState, "redo");
+  };
+
+  loadHistoryState = (state: any, mode: "undo" | "redo" = "undo") => {
+    let newActiveRunes = [];
+    let undo = mode === "undo" ? true : false;
+
+    if (state[1].length) {
+      this.prevActiveRunes = this.activeRunes;
+
+      if (!!state[0] === undo) {
+        newActiveRunes = mergeArray(this.activeRunes, state[1]);
+      } else {
+        newActiveRunes = filterDifferentArray(this.activeRunes, state[1]);
+      }
+      this.activeRunes = newActiveRunes;
+
+      this.updateRunePointDOM(!state[0] === undo, false);
+      this.generateRuneSummary();
+    }
+  };
+
   activateRuneFromShareKey = (key: string) => (this.shareKey = key);
 
   private createRuneCost = (link: number) => {
@@ -416,8 +453,6 @@ export class RuneSimulator extends React.PureComponent<
     let visited: any = [];
     let pathLowestCost: number = Infinity;
 
-    console.log("DijkstraPath");
-
     to = typeof to === "number" ? [to] : to;
     to = [...to];
 
@@ -430,7 +465,7 @@ export class RuneSimulator extends React.PureComponent<
       this.runecost[runeid][this.runeCostType];
 
     const replaceShortestPath = (vertex: any, via: any, cost: number) => {
-      console.log("replaceShortestPath", vertex, via, cost);
+      //console.log("replaceShortestPath", vertex, via, cost);
       let path = shortest_path.find((path: any) => {
         return path.to === vertex;
       });
@@ -453,21 +488,16 @@ export class RuneSimulator extends React.PureComponent<
 
       let costFromStart = getCostFromStart(thisRuneId).cost;
 
-      console.log("costFromStart", costFromStart, shortest_path);
+      //console.log("costFromStart", costFromStart, shortest_path);
 
       this.runebase[thisRuneId].link.map((toId: number) => {
         //console.log(">> ", thisVertexId, " => ", linkId);
-
-        if ((thisRuneId === 490000)) {
-          console.log("newShortPath", toId);
-        }
 
         // 27/06/2019 CHANGE
         // let runeLinkCost = getRuneLinkCost(toId);
         let runeLinkCost = getRuneLinkCost(thisRuneId);
         let prevLinkFromStart = getCostFromStart(toId);
         let costLinkFromStart = costFromStart + runeLinkCost;
-        console.log(prevLinkFromStart)
 
         if ((to as number[]).indexOf(toId) > -1) {
           // Kalau link ni dah bersambung dengan target atau mana2 activated vertex, set sebagai jupe dh
@@ -491,30 +521,21 @@ export class RuneSimulator extends React.PureComponent<
 
             // Add new shortest path sebab path ni belum ada
 
-            
             shortest_path.push(newShortPath);
           } else {
             let linkCostFromStart = prevLinkFromStart.cost;
             let newLinkCostFromStart = costLinkFromStart;
-            console.log(
-              "NONONONONONONO",
-              linkCostFromStart,
-              newLinkCostFromStart
-            );
 
             // kalau path baru ni lagi dekat dengan path lama, replace path terdekat tu dengan id baru
             if (linkCostFromStart > newLinkCostFromStart) {
-              //
-              //    Rasenye operation ni tak perlu. Sebab aku dah sort path tu ikut lowest weight. kirenye shortest path atas tu mmg dh betul2 shortest
-              //
-              // prevLink from start ni dah di define, tgk cost dia dari start
-
+              /*
               console.warn(
                 "Shorter path found",
                 toId,
                 thisRuneId,
                 newLinkCostFromStart
               );
+              */
               replaceShortestPath(toId, thisRuneId, newLinkCostFromStart);
             }
           }
@@ -684,14 +705,19 @@ export class RuneSimulator extends React.PureComponent<
     this.activeRunes = Object.keys(this.runebase)
       .map(Number)
       .filter((eachRune: any) => this.runebase[eachRune].tier <= currentTier);
+
     this.updateRunePointDOM();
     this.generateRuneSummary();
   };
 
   resetRune = () => {
     //this.activeRuneCost = { step: 0, medal: 0, cont: 0 };
+    this.History.addState(this.activeRunes, true);
     this.activeRunes = [this.startPoint];
-    this.generateRuneSummary();
+
+    // CHANGED 28/06/2019 (commented)
+    //this.generateRuneSummary();
+
     $(`[data-id]:not([data-id="${this.startPoint}"])`).attr(
       "data-active",
       String(false)
@@ -705,7 +731,10 @@ export class RuneSimulator extends React.PureComponent<
   getLinkId = (rune1: number, rune2: number) =>
     rune1 < rune2 ? `${rune1}-${rune2}` : `${rune2}-${rune1}`;
 
-  updateRunePointDOM = (deleteMode: boolean = false) => {
+  updateRunePointDOM = (
+    deletion: boolean = false,
+    recordStateHistory: boolean = true
+  ) => {
     const activateRunePoint = (id: number, addMode: boolean = true) => {
       $(`[data-id="${id}"]`).attr("data-active", String(addMode));
       updateLinkDOM(id, addMode);
@@ -727,13 +756,13 @@ export class RuneSimulator extends React.PureComponent<
 
     const getRunePointDOM = (id: number): string => `[data-id="${id}"]`;
 
-    const getLinkDOM = (id: number, deleteMode: boolean = false) => {
+    const getLinkDOM = (id: number, deletion: boolean = false) => {
       if (!this.runeLinks[id]) return;
 
       this.runeLinks[id].forEach((linkId: any) => {
         if (
           this.activeRunes.includes(linkId) === true ||
-          this.activeRunes.includes(linkId) === !deleteMode
+          this.activeRunes.includes(linkId) === !deletion
         ) {
           let link = this.getLinkId(id, linkId);
           let linkDom = `.linkLine[data-link="${link}"]`;
@@ -753,7 +782,7 @@ export class RuneSimulator extends React.PureComponent<
 
     activateRunePoint(this.startPoint);
 
-    if (deleteMode) {
+    if (deletion) {
       affectedRuneSet = prev.filter(x => !curr.includes(x));
     } else {
       affectedRuneSet = curr
@@ -765,11 +794,17 @@ export class RuneSimulator extends React.PureComponent<
       .map((runeId: number) => getRunePointDOM(runeId))
       .join(",");
 
-    affectedRuneSet.forEach((runeId: number) => getLinkDOM(runeId, deleteMode));
+    // Check to prevent overwriting History when we undo/redo
+    if (recordStateHistory) {
+      // Add only affected runes to the history state
+      this.History.addState(affectedRuneSet, deletion);
+    }
+
+    affectedRuneSet.forEach((runeId: number) => getLinkDOM(runeId, deletion));
     linkDOMs = affectedRuneLinkSet.join(",");
 
-    $(runeDOMs).attr("data-active", String(!deleteMode));
-    $(linkDOMs).attr("data-active", String(!deleteMode));
+    $(runeDOMs).attr("data-active", String(!deletion));
+    $(linkDOMs).attr("data-active", String(!deletion));
   };
 
   deactivateRune = (id: number) => {
@@ -845,7 +880,7 @@ export class RuneSimulator extends React.PureComponent<
   };
 
   RunePoint_onClick = (id: number, _coor?: any) => {
-    console.log("Clicked on Rune ID:", id, _coor ? _coor : ""); // DEBUG
+    //console.log("Clicked on Rune ID:", id, _coor ? _coor : ""); // DEBUG
     //this.viewportToId(id)
 
     id = Number(id);

@@ -74,11 +74,9 @@ class RunePoint extends React.PureComponent<RunePointProps, RunePointState> {
           let specialRuneTipText: string =
             runeDesc[this.getLang("specialRuneTipText")];
 
-          popoverContent = parse(replaceStringParam(
-            specialRuneTipText,
-            specialSkillParam
-          ));
-          
+          popoverContent = parse(
+            replaceStringParam(specialRuneTipText, specialSkillParam)
+          );
         }
 
         let extraNote = <></>;
@@ -141,13 +139,13 @@ class RunePoint extends React.PureComponent<RunePointProps, RunePointState> {
             <>
               {popoverContent}
               <div>
-                <Button
-                  style={{ width: "100%", marginTop: 5 }}
-                  className="btn-reset"
-                  onClick={this.handleClick}
-                >
-                  Reset
-                </Button>
+                  <Button
+                    style={{ width: "100%", marginTop: 5 }}
+                    className="btn-reset"
+                    onClick={this.handleClick}
+                  >
+                    Reset
+                  </Button>
               </div>
             </>
           );

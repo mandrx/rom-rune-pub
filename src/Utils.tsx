@@ -58,6 +58,26 @@ const uniquePush = (arr: any[], value: any) => {
   return arr;
 };
 
+const mergeArray = (...arrays: any[]) => {
+  let jointArrays: any[] = [];
+
+  // Merge array.
+  arrays.forEach(array => {
+    jointArrays = [...jointArrays, ...array];
+  });
+
+  // Filter duplicates and return.
+  return jointArrays.filter(
+    (item, index) => jointArrays.indexOf(item) === index
+  );
+};
+
+const filterDifferentArray = (arrA: any, arrB: any) => {
+  return arrA
+    .filter((x: any) => !arrB.includes(x))
+    .concat(arrB.filter((x: any) => !arrA.includes(x)));
+};
+
 const numberWithCommas = (number: number): string => {
   if (number === undefined) number = 0;
   return number.toLocaleString();
@@ -86,7 +106,9 @@ export {
   numberWithCommas,
   getPropertyLang,
   array_sum,
-  stylizeDesc
+  stylizeDesc,
+  mergeArray,
+  filterDifferentArray
 };
 
 export default {
@@ -98,5 +120,7 @@ export default {
   numberWithCommas,
   getPropertyLang,
   array_sum,
-  stylizeDesc
+  stylizeDesc,
+  mergeArray,
+  filterDifferentArray
 };

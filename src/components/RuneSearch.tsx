@@ -3,6 +3,7 @@ import { Select, Icon } from "antd";
 import { isMobile } from "react-device-detect";
 import $ from "jquery";
 import { getPropertyLang } from "../Utils";
+
 const { Option, OptGroup } = Select;
 
 export interface RuneSearchProps {
@@ -45,7 +46,7 @@ class RuneSearch extends React.Component<RuneSearchProps, RuneSearchState> {
       let selected = runeNameList.find((a: any) => sel === a.uid);
       selectionArr.push(selected.idArray);
     });
-    
+
     onChange(selectionArr);
   };
 
@@ -55,13 +56,48 @@ class RuneSearch extends React.Component<RuneSearchProps, RuneSearchState> {
       $(".rune-search-box .ant-select-search__field").attr("readonly", "true");
   };
 
+  clearSelection = () => {
+    if(!this.refs.runeSearch){
+      return;
+    }
+    const _this = (this.refs.runeSearch as any).rcSelect;
+    const props = _this.props;
+    const state = _this.state;
+
+    
+
+    if (props.disabled) {
+      return;
+    }
+
+    let inputValue = state.inputValue;
+    let value = state.value;
+
+    if (inputValue || value.length) {
+      if (value.length) {
+        _this.fireChange([]);
+      }
+
+      _this.setOpenState(false, {
+        needFocus: true
+      });
+
+      if (inputValue) {
+        _this.setInputValue("");
+      }
+    }
+  };
+
   getLang = (property: string): string => {
     return getPropertyLang(property, this.props.lang);
   };
 
   render() {
+    
     return (
       <Select
+        allowClear={true}
+        ref="runeSearch"
         placeholder="Search rune..."
         style={{ width: "100%" }}
         onChange={this.handleOnChange}

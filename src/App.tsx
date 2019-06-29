@@ -44,7 +44,7 @@ const { TabPane } = Tabs;
 class App extends React.PureComponent {
   private defaultTier = Tier.t3;
   private defaultJob = JobID.Wizard;
-  private defaultCost = RuneCostType.Medal;
+  private defaultCost = RuneCostType.Balanced;
   private baseHeight = 3000; //2970;
   private baseWidth = 3800;
   private shareKey = "";
@@ -94,7 +94,7 @@ class App extends React.PureComponent {
       tier === 20000 || tier === 30000 || tier === 40000
         ? tier
         : this.defaultTier;
-    costType = costType >= 0 && costType < 3 ? costType : this.defaultCost;
+    costType = costType >= 0 && costType < 4 ? costType : this.defaultCost;
 
     this.state.jobId = jobId;
     this.state.tier = tier;

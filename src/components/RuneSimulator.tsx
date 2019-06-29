@@ -470,13 +470,38 @@ export class RuneSimulator extends React.PureComponent<
     };
 
     const getRuneLinkCost = (runeid: any): number => {
-      // Gold medal as Main weight, Contribution as Secondary weight
-      //console.log('secodary',this.runecost[runeid][this.runeCostType.secodary])
+      const thisRuneCost = this.runecost[runeid];
+      let primary = this.runeWeightType.primary;
+      let secondary = this.runeWeightType.secodary;
+      let intensity = this.secondaryWeightIntensity;
+
+      if (primary === RuneCostType.Balanced) {
+        // Gold medal as Main weight, Contribution as Secondary weight
+        primary = RuneCostType.Medal;
+        secondary = RuneCostType.Contribution;
+        intensity = 1500;
+      }
+      if (primary === RuneCostType.Contribution) {
+        // Contribution as Main weight, Gold medal as Secondary weight
+        primary = RuneCostType.Contribution;
+        secondary = RuneCostType.Medal;
+      }
+
       const weight =
-        this.runecost[runeid][this.runeWeightType.primary] +
-        this.runecost[runeid][this.runeWeightType.secodary] /
-          this.secondaryWeightIntensity;
-      //console.log("weight",this.runecost[runeid][this.runeWeightType.secodary],' / ',this.secondaryWeightIntensity,' = ',weight);
+        thisRuneCost[primary] + thisRuneCost[secondary] / intensity;
+
+      /*
+      console.log(
+        "weight",
+        thisRuneCost[primary],
+        thisRuneCost[secondary],
+        " / ",
+        intensity,
+        " = ",
+        weight
+      );
+      */
+
       return weight;
     };
 

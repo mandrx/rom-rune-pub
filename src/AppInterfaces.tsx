@@ -55,7 +55,8 @@ export enum StatTextCN {
 export enum RuneCostType {
   Step = 0,
   Medal = 1,
-  Contribution = 2
+  Contribution = 2,
+  Balanced = 3
 }
 
 export interface AstrolabeData {

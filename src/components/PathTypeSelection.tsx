@@ -44,9 +44,10 @@ class PathTypeSelection extends React.PureComponent<
           style={{ width: "100%", whiteSpace: "nowrap" }}
           className={position === "vertical" ? "radio-vertical" : ""}
         >
-          <Radio.Button value={RuneCostType.Step} key={1}>Shortest Distance</Radio.Button>
+          <Radio.Button value={RuneCostType.Balanced} key={4}>Balanced (Recommended)</Radio.Button>
           <Radio.Button value={RuneCostType.Medal} key={2}>Least Gold Medal</Radio.Button>
           <Radio.Button value={RuneCostType.Contribution} key={3}>Least Contribution</Radio.Button>
+          <Radio.Button value={RuneCostType.Step} key={1}>Shortest Distance</Radio.Button>
         </Radio.Group>
       </div>
     );

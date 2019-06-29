@@ -231,13 +231,14 @@ class App extends React.PureComponent {
   };
 
   handleRuneSearchChange = (id: any) => {
+    /*
     const setHeight = () => {
-      /*const runeBoxHeight = $(".rune-search-box .ant-select").height();
+      const runeBoxHeight = $(".rune-search-box .ant-select").height();
       $(".top-control-container").css("minHeight","max-content");
       $(".top-control-container.is-open").css(
         "minHeight",
         Math.ceil(runeBoxHeight! + 49)
-      );*/
+      );
     };
     
     // There is slight animation delay. Wait till animation ends.
@@ -247,6 +248,14 @@ class App extends React.PureComponent {
 
     // Set instantly for smoother adding transition
     setHeight();
+    */
+
+    // scroll to bottom
+    setTimeout(() => {
+      $(".rune-search-box .ant-select-selection--multiple")!.scrollTop(
+        $(".rune-search-box .ant-select-selection--multiple").prop("scrollHeight") + 50
+      );
+    }, 10);
 
     this.runeSimulator!.highlightRune(id);
   };

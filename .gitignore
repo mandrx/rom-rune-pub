@@ -32,3 +32,6 @@ __images/data/lastUpdate.json
 __images/data/astrolabe.json
 src/images/_sword.svg
 src/images/shura.png
+src/data/unused/runeSpecialDesc.json
+src/data/unused/runeSpecial.json
+src/data/unused/lastUpdate.json

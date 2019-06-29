@@ -8,7 +8,7 @@ import {
   filterDifferentArray
 } from "../Utils";
 import localForage from "localforage";
-import { RuneCostType, JobID } from "../AppInterfaces";
+import { RuneCostType } from "../AppInterfaces";
 import $ from "jquery";
 import "../styles/runeStyling.scss";
 import RunePoint from "./RunePoint";
@@ -74,7 +74,12 @@ export class RuneSimulator extends React.PureComponent<
   private activeRunes: number[] = [this.startPoint];
   private runeLinks: any = [];
   private prevActiveRunes: number[] = [this.startPoint];
-  private runeCostType = RuneCostType.Medal;
+  private runeWeightType = {
+    primary: RuneCostType.Medal,
+    secodary: RuneCostType.Contribution
+  };
+  private secondaryWeightIntensity = 10000;
+
   private runecost: any = {};
   private runebase: any = {};
   private runesJson: any = {};
@@ -458,11 +463,22 @@ export class RuneSimulator extends React.PureComponent<
 
     let unvisitedCombo: any = {};
 
-    const getCostFromStart = (to: number) =>
-      shortest_path.find((path: any) => path.to == to);
+    const getCostFromStart = (to: number) => {
+      const shortestCost = shortest_path.find((path: any) => path.to == to);
+      //console.log('shortestCost',shortestCost)
+      return shortestCost;
+    };
 
-    const getRuneLinkCost = (runeid: any): number =>
-      this.runecost[runeid][this.runeCostType];
+    const getRuneLinkCost = (runeid: any): number => {
+      // Gold medal as Main weight, Contribution as Secondary weight
+      //console.log('secodary',this.runecost[runeid][this.runeCostType.secodary])
+      const weight =
+        this.runecost[runeid][this.runeWeightType.primary] +
+        this.runecost[runeid][this.runeWeightType.secodary] /
+          this.secondaryWeightIntensity;
+      //console.log("weight",this.runecost[runeid][this.runeWeightType.secodary],' / ',this.secondaryWeightIntensity,' = ',weight);
+      return weight;
+    };
 
     const replaceShortestPath = (vertex: any, via: any, cost: number) => {
       //console.log("replaceShortestPath", vertex, via, cost);
@@ -533,7 +549,9 @@ export class RuneSimulator extends React.PureComponent<
                 "Shorter path found",
                 toId,
                 thisRuneId,
-                newLinkCostFromStart
+                newLinkCostFromStart,
+                "older cost:",
+                linkCostFromStart
               );
               */
               replaceShortestPath(toId, thisRuneId, newLinkCostFromStart);
@@ -561,7 +579,7 @@ export class RuneSimulator extends React.PureComponent<
       uniquePush(visited, thisRuneId);
     };
 
-    const getNextShortestVertext = (): number => {
+    const getNextShortestVertex = (): number => {
       let sorted = Object.keys(unvisitedCombo).sort((a: string, b: string) => {
         return unvisitedCombo[a] - unvisitedCombo[b];
       });
@@ -573,7 +591,7 @@ export class RuneSimulator extends React.PureComponent<
     visit(from, true);
 
     while (Object.entries(unvisitedCombo).length > 0) {
-      visit(getNextShortestVertext());
+      visit(getNextShortestVertex());
     }
     return shortest_path;
   };
@@ -735,7 +753,7 @@ export class RuneSimulator extends React.PureComponent<
     deletion: boolean = false,
     recordStateHistory: boolean = true
   ) => {
-    const activateRunePoint = (id: number, addMode: boolean = true) => {
+    const activateRuneDOM = (id: number, addMode: boolean = true) => {
       $(`[data-id="${id}"]`).attr("data-active", String(addMode));
       updateLinkDOM(id, addMode);
     };
@@ -780,7 +798,7 @@ export class RuneSimulator extends React.PureComponent<
     let runeDOMs: string;
     let linkDOMs: string;
 
-    activateRunePoint(this.startPoint);
+    activateRuneDOM(this.startPoint);
 
     if (deletion) {
       affectedRuneSet = prev.filter(x => !curr.includes(x));
@@ -1026,7 +1044,8 @@ export class RuneSimulator extends React.PureComponent<
     return scale;
   };
 
-  changeCostType = (costType: RuneCostType) => (this.runeCostType = costType);
+  changeCostType = (costType: RuneCostType) =>
+    (this.runeWeightType.primary = costType);
 
   changeTier = (tier: number) =>
     $(".rune-simulator").attr("data-tier", (this.tier = tier));

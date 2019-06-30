@@ -553,7 +553,11 @@ body {
   }
   .ant-layout-sider {
     &::-webkit-scrollbar {
-      display: none;
+      //display: none;
+      width: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #eaa510;
     }
   }
 } //Body END

@@ -119,7 +119,7 @@ export class RuneSimulator extends React.PureComponent<
           if (toggleBool) activateArr.push(Number(allRuneId[index]));
         });
 
-        this.activeRunes = activateArr;
+        this.updateActiveRunes(activateArr);
         this.updateRunePointDOM(false, false);
       }
     }
@@ -301,14 +301,14 @@ export class RuneSimulator extends React.PureComponent<
     const undo = mode === "undo" ? true : false;
 
     if (state[1].length) {
-      this.prevActiveRunes = this.activeRunes;
+      this.saveActiveRunes();
 
       if (!!state[0] === undo) {
         newActiveRunes = mergeArray(this.activeRunes, state[1]);
       } else {
         newActiveRunes = filterDifferentArray(this.activeRunes, state[1]);
       }
-      this.activeRunes = newActiveRunes;
+      this.updateActiveRunes(newActiveRunes);
 
       this.updateRunePointDOM(!state[0] === undo, false);
       this.generateRuneSummary();
@@ -380,7 +380,7 @@ export class RuneSimulator extends React.PureComponent<
   activateRune = (target: number) => {
     // Return If user clicked in mobile mode.
     let activeRunes: number[] = this.activeRunes;
-    this.prevActiveRunes = JSON.parse(JSON.stringify(activeRunes));
+    this.saveActiveRunes();
 
     let completeRoute: boolean = false;
     let count = 0;
@@ -429,7 +429,7 @@ export class RuneSimulator extends React.PureComponent<
 
         if (currentPath === target) {
           completeRoute = true;
-          this.activeRunes = activeRunes;
+          this.updateActiveRunes(activeRunes);
           this.updateRunePointDOM();
         }
       }
@@ -725,34 +725,33 @@ export class RuneSimulator extends React.PureComponent<
     setTimeout(_async);
   };
 
-  selectAllRune = () => {
-    let currentTier = this.getSelectedTier();
-    this.prevActiveRunes = JSON.parse(JSON.stringify(this.activeRunes));
+  saveActiveRunes = (runeList: number[] = []) =>
+    (this.prevActiveRunes = JSON.parse(
+      JSON.stringify(runeList.length ? runeList : this.activeRunes)
+    ));
 
-    this.activeRunes = this.getAllRuneId(false).filter(
+  updateActiveRunes = (newRuneList: number[]) =>
+    (this.activeRunes = newRuneList.length ? newRuneList : [this.startPoint]);
+
+  selectAllRune = () => {
+    const currentTier = this.getSelectedTier();
+
+    const newActiveRunes = this.getAllRuneId(false).filter(
       (eachRune: number) => this.getRuneTier(eachRune) <= currentTier
     );
+
+    this.saveActiveRunes();
+    this.updateActiveRunes(newActiveRunes);
 
     this.updateRunePointDOM();
     this.generateRuneSummary();
   };
 
   resetRune = () => {
-    //this.activeRuneCost = { step: 0, medal: 0, cont: 0 };
-    this.History.addState(this.activeRunes, true);
-    this.activeRunes = [this.startPoint];
-
-    // CHANGED 28/06/2019 (commented)
-    //this.generateRuneSummary();
-
-    $(`[data-id]:not([data-id="${this.startPoint}"])`).attr(
-      "data-active",
-      String(false)
-    );
-    $(`[data-link]:not([data-id="${this.startPoint}"])`).attr(
-      "data-active",
-      String(false)
-    );
+    this.saveActiveRunes();
+    this.updateActiveRunes([]);
+    this.updateRunePointDOM(true);
+    this.generateRuneSummary();
   };
 
   getLinkId = (rune1: number, rune2: number) =>
@@ -816,22 +815,31 @@ export class RuneSimulator extends React.PureComponent<
         .filter(x => !prev.includes(x))
         .concat(prev.filter(x => !curr.includes(x)));
     }
-    //runeSet.forEach((runeId: number) => activateRunePoint(runeId));  // Old method, looping through each runepoint is slow.
-    runeDOMs = affectedRuneSet
-      .map((runeId: number) => getRunePointDOM(runeId))
-      .join(",");
+    
+    // string concat() is faster than array join()
+    runeDOMs = "".concat(
+      affectedRuneSet.map((runeId: number) => getRunePointDOM(runeId))
+    );
 
     // Check to prevent overwriting History when we undo/redo
     if (recordStateHistory) {
-      // Add only affected runes to the history state
-      this.History.addState(affectedRuneSet, deletion);
+      
+      // Add only affected runes to the history state      
+      this.History.addState(affectedRuneSet, deletion);      
     }
 
     affectedRuneSet.forEach((runeId: number) => getLinkDOM(runeId, deletion));
-    linkDOMs = affectedRuneLinkSet.join(",");
+    linkDOMs = "".concat(affectedRuneLinkSet);
 
-    $(runeDOMs).attr("data-active", String(!deletion));
+    /*
+    // Plain JS
+    const activate = (dom: any) => (dom.dataset.active = !deletion);
+    if (runeDOMs) Array.from(document.querySelectorAll(runeDOMs)).map(activate);
+    if (linkDOMs) Array.from(document.querySelectorAll(linkDOMs)).map(activate);
+    */
+    $(runeDOMs).attr("data-active", String(!deletion));    
     $(linkDOMs).attr("data-active", String(!deletion));
+    
   };
 
   deactivateRune = (id: number) => {
@@ -843,13 +851,12 @@ export class RuneSimulator extends React.PureComponent<
     let delIndex = activeRunes.indexOf(id);
 
     // Jangan buang. ni untuk compare prev & new active runes dekat dom update.
-    this.prevActiveRunes = JSON.parse(JSON.stringify(activeRunes));
+    this.saveActiveRunes();
 
     // Deactivate given ID
     activeRunes.splice(delIndex, 1);
 
-    // Check path after given ID deactivated
-    this.time_reset();
+    // Check path after given ID deactivated    
     while (q.length) {
       let qpop = q.pop();
       uniquePush(newActiveRunes, qpop!);
@@ -861,8 +868,7 @@ export class RuneSimulator extends React.PureComponent<
         });
       }
     }
-    this.time_reset();
-    this.activeRunes = newActiveRunes;
+    this.updateActiveRunes(newActiveRunes);
     this.updateRunePointDOM(true);
   };
 
@@ -923,9 +929,9 @@ export class RuneSimulator extends React.PureComponent<
       } else {
         this.activateRune(id);
       }
+      this.generateRuneSummary();
+      this.generateShareKey();
     }
-    this.generateRuneSummary();
-    this.generateShareKey();
   };
 
   renderPoints = () => {

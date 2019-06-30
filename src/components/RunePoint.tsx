@@ -10,7 +10,7 @@ export interface RunePointProps {
   id: number;
   cost: number[];
   key: number;
-  coor: number[];
+  coor: any;
   tier: number;
   getRuneDesc: Function;
   getSelectedTier: Function;
@@ -178,8 +178,8 @@ class RunePoint extends React.PureComponent<RunePointProps, RunePointState> {
         <div
           className={`runepoint${this.startingPoint}`}
           style={{
-            left: coor[0],
-            top: coor[1]
+            left: coor.x,
+            top: coor.y
           }}
           onClick={
             isBrowser

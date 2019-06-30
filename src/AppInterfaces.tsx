@@ -133,6 +133,37 @@ export enum Tier {
   t4 = 45003
 }
 
+export enum ROMJob {
+  Job11 = "knight",
+  Job12 = "crusader",
+  Job21 = "wizard",
+  Job22 = "sage",
+  Job31 = "assassin",
+  Job32 = "rogue",
+  Job41 = "hunter",
+  Job42 = "bard_dancer",
+  Job51 = "priest",
+  Job52 = "monk",
+  Job61 = "blacksmith",
+  Job62 = "alchemist"
+}
+
+export enum DBKey {
+  RuneBasic = "runebasic",
+  Rune11 = "runeData_11",
+  Rune12 = "runeData_12",
+  Rune21 = "runeData_21",
+  Rune22 = "runeData_22",
+  Rune31 = "runeData_31",
+  Rune32 = "runeData_32",
+  Rune41 = "runeData_41",
+  Rune42 = "runeData_42",
+  Rune51 = "runeData_51",
+  Rune52 = "runeData_52",
+  Rune61 = "runeData_61",
+  Rune62 = "runeData_62"
+}
+
 export class GameClasses {
   static Knight = ["Swordsman", "Knight", "Lord Knight", "Rune Knight"];
   static Crusader = ["Swordsman", "Crusader", "Paladin", "Royal Guard"];

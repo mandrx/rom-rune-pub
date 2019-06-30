@@ -8,7 +8,7 @@ import {
   filterDifferentArray
 } from "../Utils";
 import localForage from "localforage";
-import { RuneCostType } from "../AppInterfaces";
+import { RuneCostType, DBKey } from "../AppInterfaces";
 import $ from "jquery";
 import "../styles/runeStyling.scss";
 import RunePoint from "./RunePoint";
@@ -17,36 +17,7 @@ import LZString from "lz-string";
 import { updateUrlShareKey } from "../UrlManager";
 import { RuneHistory } from "../RuneHistory";
 
-export enum ROMJob {
-  Job11 = "knight",
-  Job12 = "crusader",
-  Job21 = "wizard",
-  Job22 = "sage",
-  Job31 = "assassin",
-  Job32 = "rogue",
-  Job41 = "hunter",
-  Job42 = "bard_dancer",
-  Job51 = "priest",
-  Job52 = "monk",
-  Job61 = "blacksmith",
-  Job62 = "alchemist"
-}
 
-export enum DBKey {
-  RuneBasic = "runebasic",
-  Rune11 = "runeData_11",
-  Rune12 = "runeData_12",
-  Rune21 = "runeData_21",
-  Rune22 = "runeData_22",
-  Rune31 = "runeData_31",
-  Rune32 = "runeData_32",
-  Rune41 = "runeData_41",
-  Rune42 = "runeData_42",
-  Rune51 = "runeData_51",
-  Rune52 = "runeData_52",
-  Rune61 = "runeData_61",
-  Rune62 = "runeData_62"
-}
 
 export interface RuneSimulatorProps {
   setZoom: Function;
@@ -69,10 +40,16 @@ export class RuneSimulator extends React.PureComponent<
   private dataLang = this.props.lang;
   private startPoint: number = 10000;
   private tier: number = 20000;
+  private jobId: number = 0;
+
   private currentZoom: number = 3;
   private zoomRange: number[] = [0.27, 0.35, 0.45, 0.6, 0.8, 1, 1.25];
-  private activeRunes: number[] = [this.startPoint];
+
+  private runeData: any = {};
+  private runeDesc: any = {};
+
   private runeLinks: any = [];
+  private activeRunes: number[] = [this.startPoint];
   private prevActiveRunes: number[] = [this.startPoint];
   private runeWeightType = {
     primary: RuneCostType.Medal,
@@ -80,16 +57,10 @@ export class RuneSimulator extends React.PureComponent<
   };
   private secondaryWeightIntensity = 10000;
 
-  private runecost: any = {};
-  private runebase: any = {};
-  private runesJson: any = {};
-  private astrolabeJson: any = {};
-  private jobId: number = 0;
-
   private shareKey: string = "";
+  private storageKey: string = "simulatorData"
 
-  private runeDesc: any = {};
-  private basicDataLoaded = false;
+  private JSONLoaded = false;
   private jobDataLoaded = false;
   private runeNameTables: any = [];
   public History: RuneHistory = new RuneHistory();
@@ -110,9 +81,12 @@ export class RuneSimulator extends React.PureComponent<
   }
 
   componentDidUpdate() {
-    this.zoom();
     this.time_print("componentDidUpdate");
+    this.checkShareKey();
+    this.zoom();
+  }
 
+  checkShareKey = () => {
     if (!!this.shareKey) {
       let binaryPattern = "";
       try {
@@ -123,68 +97,46 @@ export class RuneSimulator extends React.PureComponent<
 
       if (binaryPattern) {
         let activateArr: number[] = [];
+        const allRuneId = this.getAllRuneId();
         const binaryActive = binaryPattern.split("");
-        const runeIdList = Object.keys(this.runebase).map(Number);
-        runeIdList.sort((a: number, b: number) => (a < b ? -1 : 1));
 
         // Loop through each binary
         binaryActive.forEach((toggle: string, index: number) => {
           let toggleBool: boolean = Boolean(Number(toggle));
           // Push rune id if it is true
-          if (toggleBool) activateArr.push(Number(runeIdList[index]));
+          if (toggleBool) activateArr.push(Number(allRuneId[index]));
         });
 
         this.activeRunes = activateArr;
         this.updateRunePointDOM(false, false);
       }
     }
-  }
+  };
 
   loadGameRuneData() {
-    let runebase: any = [];
-    let runecost: any = [];
-    let vertexlinks: any = [];
-
     let loadKey = "runeData";
     this.showLoading(loadKey, "Loading rune data...");
 
+    let runeData = {};
+
     localForage
-      .getItem(DBKey.RuneBasic)
+      .getItem(this.storageKey)
       .then((data: any) => {
         if (!data) {
           console.log("Not using cached data.");
-          this.runesJson = require("../data/rune.json");
-          this.astrolabeJson = require("../data/astrolabe.json");
-
-          this.astrolabeJson.forEach((vertex: any) => {
-            runebase[vertex.Id] = {
-              coor: [vertex.X / 2.3, -vertex.Y / 2.3],
-              link: vertex.Link,
-              tier: vertex.Evo
-            };
-
-            vertex.Link.forEach((link: number) => {
-              if (runecost[link] === undefined) {
-                runecost[link] = this.createRuneCost(link);
-              }
-            });
-            [vertex.Link] = vertexlinks;
-          });
-
-          localForage.setItem(DBKey.RuneBasic, {
-            base: runebase,
-            cost: runecost
+          runeData = require("../data/runes.json");
+          localForage.setItem(this.storageKey, {
+            runeData: runeData
           });
         } else {
           console.log("Using cached data.");
-          runecost = data.cost;
-          runebase = data.base;
+          runeData = data.runeData;
         }
       })
       .finally(() => {
-        this.runecost = runecost;
-        this.runebase = runebase;
-        this.basicDataLoaded = true;
+        //TEMPORARY
+        this.runeData = runeData;
+        this.JSONLoaded = true;
 
         if (this.jobDataLoaded) {
           this.setState({
@@ -249,7 +201,7 @@ export class RuneSimulator extends React.PureComponent<
         this.runeDesc = runeDesc;
         this.jobDataLoaded = true;
 
-        if (this.basicDataLoaded) {
+        if (this.JSONLoaded) {
           this.setState({
             runeDataLoaded: true
           });
@@ -313,18 +265,18 @@ export class RuneSimulator extends React.PureComponent<
   };
 
   undo = () => {
-    let toState = this.History.undoState();
+    const toState = this.History.undoState();
     this.loadHistoryState(toState, "undo");
   };
 
   redo = () => {
-    let toState = this.History.redoState();
+    const toState = this.History.redoState();
     this.loadHistoryState(toState, "redo");
   };
 
   loadHistoryState = (state: any, mode: "undo" | "redo" = "undo") => {
     let newActiveRunes = [];
-    let undo = mode === "undo" ? true : false;
+    const undo = mode === "undo" ? true : false;
 
     if (state[1].length) {
       this.prevActiveRunes = this.activeRunes;
@@ -343,31 +295,37 @@ export class RuneSimulator extends React.PureComponent<
 
   activateRuneFromShareKey = (key: string) => (this.shareKey = key);
 
-  private createRuneCost = (link: number) => {
-    const getCostById = (id: number) =>
-      this.runesJson.find((rune: any) => rune.Id === id);
+  getSelectedTier = () => this.tier;
 
-    let runeWithCostRaw = getCostById(link);
-    let cont = 0;
-    let medal = 0;
-    if (!runeWithCostRaw.Cost) {
-      cont = 0;
-    } else {
-      if (runeWithCostRaw.Cost.length > 0) cont = runeWithCostRaw.Cost[0].Count;
-      if (runeWithCostRaw.Cost.length > 1)
-        medal = runeWithCostRaw.Cost[1].Count;
-    }
-    return [1, medal, cont];
-  };
-  getRuneDesc = (id: number) =>
+  getRuneCost = (id: string | number) => [
+    1,
+    this.runeData[id].medal,
+    this.runeData[id].contribution
+  ];
+
+  getRuneTier = (id: string | number) => this.runeData[id].tier;
+
+  getRuneLink = (id: string | number): number[] =>
+    this.runeData[id].edges.map(Number);
+
+  getRuneDesc = (id: string | number) =>
     this.runeDesc.find((eachRune: any) => Number(eachRune.id) === Number(id));
-  getRuneCost = (id: string) => this.runecost[Number(id)];
-  getRuneCoor = (id: string) => this.runebase[Number(id)].coor;
-  getRuneTier = (id: string) => this.runebase[Number(id)].tier;
-  getCurrentTier = () => this.tier;
+
+  getAllRuneId = (sort: boolean = true): number[] => {
+    let allRuneId = Object.keys(this.runeData).map(Number);
+    if (sort) allRuneId.sort((a: number, b: number) => (a < b ? -1 : 1));
+    return allRuneId;
+  };
+
+  getRuneCoor = (id: string | number) => {
+    return {
+      x: this.runeData[id].x / 2.3,
+      y: -this.runeData[id].y / 2.3
+    };
+  };
+
   getCurrentTierCode = () => {
-    const tier = this.tier;
-    switch (tier) {
+    switch (this.tier) {
       case 20000:
         return "a";
       case 30000:
@@ -385,14 +343,10 @@ export class RuneSimulator extends React.PureComponent<
 
   isActiveRune = (id: number): boolean => this.activeRunes.indexOf(id) > -1;
 
-  isRuneConnected = (a: number, b: number): boolean => {
-    let linkTable: number[] = this.activeRunes;
-
-    if (linkTable.indexOf(a) > -1 && linkTable.indexOf(b) > -1) {
-      return true;
-    }
-    return false;
-  };
+  isRuneConnected = (a: number, b: number): boolean =>
+    this.activeRunes.indexOf(a) > -1 && this.activeRunes.indexOf(b) > -1
+      ? true
+      : false;
 
   activateRune = (target: number) => {
     // Return If user clicked in mobile mode.
@@ -470,7 +424,7 @@ export class RuneSimulator extends React.PureComponent<
     };
 
     const getRuneLinkCost = (runeid: any): number => {
-      const thisRuneCost = this.runecost[runeid];
+      const thisRuneCost = this.getRuneCost(runeid);
       let primary = this.runeWeightType.primary;
       let secondary = this.runeWeightType.secodary;
       let intensity = this.secondaryWeightIntensity;
@@ -531,7 +485,7 @@ export class RuneSimulator extends React.PureComponent<
 
       //console.log("costFromStart", costFromStart, shortest_path);
 
-      this.runebase[thisRuneId].link.map((toId: number) => {
+      this.getRuneLink(thisRuneId).map((toId: number) => {
         //console.log(">> ", thisVertexId, " => ", linkId);
 
         // 27/06/2019 CHANGE
@@ -589,7 +543,7 @@ export class RuneSimulator extends React.PureComponent<
           visited.indexOf(toId) < 0 &&
           pathLowestCost > costLinkFromStart + runeLinkCost
         ) {
-          if (this.runebase[toId].tier <= this.tier) {
+          if (this.getRuneTier(toId) <= this.tier) {
             if (unvisitedCombo[toId] == undefined) {
               unvisitedCombo[toId] = costLinkFromStart;
             } else {
@@ -627,14 +581,13 @@ export class RuneSimulator extends React.PureComponent<
   };
 
   generateShareKey = () => {
-    let runeIdList = Object.keys(this.runebase).map(Number);
-    runeIdList.sort((a: number, b: number) => (a < b ? -1 : 1));
+    let allRuneId = this.getAllRuneId();
 
     let activeRunes = this.activeRunes;
     activeRunes.sort((a: number, b: number) => (a < b ? -1 : 1));
 
     let foundCount = 0;
-    let binaryArr = runeIdList.map((runeId: number) => {
+    let binaryArr = allRuneId.map((runeId: number) => {
       if (runeId === this.activeRunes[foundCount]) {
         foundCount++;
         return 1;
@@ -664,9 +617,10 @@ export class RuneSimulator extends React.PureComponent<
       let descProp = this.getLang("specialRuneTipText");
 
       // Accumulate Rune Cost
-      medal += this.runecost[runeId][RuneCostType.Medal];
-      cont += this.runecost[runeId][RuneCostType.Contribution];
-      step += this.runecost[runeId][RuneCostType.Step];
+      const runeCost = this.getRuneCost(runeId);
+      medal += runeCost[RuneCostType.Medal];
+      cont += runeCost[RuneCostType.Contribution];
+      step += runeCost[RuneCostType.Step];
 
       // Summarize Rune. Check if runeDesc is not undefined.
       if (!!runeDesc && !!runeDesc.name) {
@@ -742,12 +696,12 @@ export class RuneSimulator extends React.PureComponent<
   };
 
   selectAllRune = () => {
-    let currentTier = this.getCurrentTier();
+    let currentTier = this.getSelectedTier();
     this.prevActiveRunes = JSON.parse(JSON.stringify(this.activeRunes));
 
-    this.activeRunes = Object.keys(this.runebase)
-      .map(Number)
-      .filter((eachRune: any) => this.runebase[eachRune].tier <= currentTier);
+    this.activeRunes = this.getAllRuneId(false).filter(
+      (eachRune: number) => this.getRuneTier(eachRune) <= currentTier
+    );
 
     this.updateRunePointDOM();
     this.generateRuneSummary();
@@ -919,7 +873,7 @@ export class RuneSimulator extends React.PureComponent<
 
   viewportToId = (id: number | string = 10000) => {
     let coor = this.getRuneCoor(id as string);
-    this.props.viewportTo(coor[0], coor[1]);
+    this.props.viewportTo(coor.x, coor.y);
   };
 
   RunePoint_onClick = (id: number, _coor?: any) => {
@@ -930,7 +884,7 @@ export class RuneSimulator extends React.PureComponent<
     if (id == this.startPoint) {
       this.resetRune();
     } else {
-      if (this.getRuneTier(id.toString()) > this.getCurrentTier()) {
+      if (this.getRuneTier(id) > this.getSelectedTier()) {
         return message.warning(
           "Higher job tier is required. Please select higher job tier."
         );
@@ -949,14 +903,14 @@ export class RuneSimulator extends React.PureComponent<
   renderPoints = () => {
     return (
       <div className="pointContainer">
-        {Object.keys(this.runebase).map((a: any) => {
+        {this.getAllRuneId(false).map((a: any) => {
           return (
             <RunePoint
               key={a}
               id={a}
               lang={this.dataLang}
               getRuneDesc={this.getRuneDesc}
-              getSelectedTier={this.getCurrentTier}
+              getSelectedTier={this.getSelectedTier}
               onClick={this.RunePoint_onClick}
               cost={this.getRuneCost(a)}
               coor={this.getRuneCoor(a)}
@@ -974,17 +928,17 @@ export class RuneSimulator extends React.PureComponent<
     return (
       <div className="linkContainer">
         <svg className="rune-links">
-          {Object.keys(this.runebase).map(_a => {
+          {this.getAllRuneId(false).map(_a => {
             const minTier = (a: number, b: number): number => {
-              a = this.getRuneTier(a.toString());
-              b = this.getRuneTier(b.toString());
+              a = this.getRuneTier(a);
+              b = this.getRuneTier(b);
               return a > b ? a : b;
             };
             let a: number = Number(_a);
-            return this.runebase[a].link.map((b: number) => {
+            return this.getRuneLink(_a).map((b: number) => {
               let midPoint: string = [
-                this.runebase[a].coor[0] + this.runebase[b].coor[0],
-                this.runebase[a].coor[1] + this.runebase[b].coor[1]
+                this.getRuneCoor(a).x + this.getRuneCoor(b).x,
+                this.getRuneCoor(a).y + this.getRuneCoor(b).y
               ].join(",");
 
               if (!this.runeLinks[a]) {
@@ -1001,10 +955,10 @@ export class RuneSimulator extends React.PureComponent<
                 return (
                   <line
                     key={`line_${a}-${b}`}
-                    x1={this.runebase[a].coor[0]}
-                    x2={this.runebase[b].coor[0]}
-                    y1={this.runebase[a].coor[1]}
-                    y2={this.runebase[b].coor[1]}
+                    x1={this.getRuneCoor(a).x}
+                    x2={this.getRuneCoor(b).x}
+                    y1={this.getRuneCoor(a).y}
+                    y2={this.getRuneCoor(b).y}
                     strokeWidth={4}
                     stroke="#00000033"
                     className={`linkLine`}
@@ -1013,23 +967,6 @@ export class RuneSimulator extends React.PureComponent<
                     data-tier={minTier(a, b)}
                   />
                 );
-
-                /*
-                <text
-                      key={`text_${a}-${b}`}
-                      x={
-                        (this.runebase[a].coor[0] + this.runebase[b].coor[1]) /
-                        2
-                      }
-                      y={
-                        (this.runebase[a].coor[1] + this.runebase[b].coor[0]) /
-                        2
-                      }
-                      className="linkWeight"
-                    >
-                      {this.runebase[a].link[b]}
-                    </text>
-                 */
               }
             });
           })}
@@ -1077,7 +1014,7 @@ export class RuneSimulator extends React.PureComponent<
 
   render() {
     console.info("Simulator Rendered");
-    if (Object.keys(this.runebase).length === 0) return "Loading...";
+    if (this.getAllRuneId().length === 0) return "Loading...";
     return (
       <React.Fragment>
         <div className="rune-simulator-container " ref="rune-container">

@@ -22,7 +22,7 @@ const stylizeDesc = (str: string): string => {
     .replace(/\[-\]/g, `</span>`)
     .replace(/\[/g, `<span class="desc-style-1">`)
     .replace(/\]/g, `</span>`)
-    .replace(/\%s/g, `<span class="desc-style-2">%s</span>`)
+    .replace(/%s/g, `<span class="desc-style-2">%s</span>`)
     .replace(/%%/g, `<span class="desc-style-2">%</span>`);
 };
 
@@ -84,7 +84,9 @@ const numberWithCommas = (number: number): string => {
 };
 
 const getPropertyLang = (property: string, lang: string = "CN"): string => {
-  return `${property}${lang == "CN" ? "" : "_" + lang}`;
+  // Temporarily disable i8n
+  //return `${property}${lang === "CN" ? "" : "_" + lang}`;
+  return property;
 };
 
 const array_sum = (array1: number[], array2: number[]) => {

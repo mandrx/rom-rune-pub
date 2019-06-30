@@ -1,10 +1,10 @@
 import React from "react";
-import { Select, Icon } from "antd";
+import { Select } from "antd";
 import { isMobile } from "react-device-detect";
 import $ from "jquery";
 import { getPropertyLang } from "../Utils";
 
-const { Option, OptGroup } = Select;
+const { Option } = Select;
 
 export interface RuneSearchProps {
   runeNameList: any;
@@ -23,7 +23,7 @@ class RuneSearch extends React.Component<RuneSearchProps, RuneSearchState> {
       Object.entries(this.props.runeNameList).forEach(
         (runeNode: any, i: number) => {
           let runeEntry;
-          let { name, uid } = (runeEntry = runeNode[1]);
+          let { uid } = (runeEntry = runeNode[1]);
           let nameProd = this.getLang("name");
           let nameTrans = runeEntry[nameProd];
 

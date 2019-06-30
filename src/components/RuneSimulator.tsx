@@ -7,17 +7,15 @@ import {
   mergeArray,
   filterDifferentArray
 } from "../Utils";
-import localForage from "localforage";
-import { RuneCostType, DBKey } from "../AppInterfaces";
 import $ from "jquery";
 import "../styles/runeStyling.scss";
-import RunePoint from "./RunePoint";
+import localForage from "localforage";
+import { RuneCostType } from "../AppInterfaces";
 import { isMobile } from "react-device-detect";
-import LZString from "lz-string";
 import { updateUrlShareKey } from "../UrlManager";
 import { RuneHistory } from "../RuneHistory";
-
-
+import LZString from "lz-string";
+import RunePoint from "./RunePoint";
 
 export interface RuneSimulatorProps {
   setZoom: Function;
@@ -26,7 +24,7 @@ export interface RuneSimulatorProps {
   viewportTo: Function;
   tier?: number;
   lang: string;
-  getRuneNameList: Function;
+  setRuneNameList: Function;
 }
 
 export interface RuneSimulatorState {
@@ -46,7 +44,7 @@ export class RuneSimulator extends React.PureComponent<
   private zoomRange: number[] = [0.27, 0.35, 0.45, 0.6, 0.8, 1, 1.25];
 
   private runeData: any = {};
-  private runeDesc: any = {};
+  //private runeDesc: any = {};
 
   private runeLinks: any = [];
   private activeRunes: number[] = [this.startPoint];
@@ -58,10 +56,10 @@ export class RuneSimulator extends React.PureComponent<
   private secondaryWeightIntensity = 10000;
 
   private shareKey: string = "";
-  private storageKey: string = "simulatorData"
+  private storageKey: string = "simulatorData";
 
   private JSONLoaded = false;
-  private jobDataLoaded = false;
+
   private runeNameTables: any = [];
   public History: RuneHistory = new RuneHistory();
 
@@ -71,7 +69,7 @@ export class RuneSimulator extends React.PureComponent<
 
   constructor(props: any) {
     super(props);
-    this.loadGameRuneData();
+    this.loadRuneData();
     this.tier = this.props.tier!;
   }
 
@@ -84,6 +82,20 @@ export class RuneSimulator extends React.PureComponent<
     this.time_print("componentDidUpdate");
     this.checkShareKey();
     this.zoom();
+
+    // Clear older version data
+    localForage.removeItem("runeData_11");
+    localForage.removeItem("runeData_12");
+    localForage.removeItem("runeData_21");
+    localForage.removeItem("runeData_31");
+    localForage.removeItem("runeData_32");
+    localForage.removeItem("runeData_41");
+    localForage.removeItem("runeData_42");
+    localForage.removeItem("runeData_51");
+    localForage.removeItem("runeData_52");
+    localForage.removeItem("runeData_61");
+    localForage.removeItem("runeData_62");
+    localForage.removeItem("runebasic");
   }
 
   checkShareKey = () => {
@@ -113,7 +125,7 @@ export class RuneSimulator extends React.PureComponent<
     }
   };
 
-  loadGameRuneData() {
+  loadRuneData() {
     let loadKey = "runeData";
     this.showLoading(loadKey, "Loading rune data...");
 
@@ -134,21 +146,106 @@ export class RuneSimulator extends React.PureComponent<
         }
       })
       .finally(() => {
-        //TEMPORARY
         this.runeData = runeData;
         this.JSONLoaded = true;
 
-        if (this.jobDataLoaded) {
-          this.setState({
-            runeDataLoaded: true
-          });
-        }
+        this.setState({
+          runeDataLoaded: true
+        });
+
+        this.changeJobData();
+
         this.hideLoading(loadKey);
         this.updateRunePointDOM();
         setTimeout(() => {
           this.props.viewportTo();
         }, 500);
       });
+  }
+
+  changeJob = (jobId: number) => {
+    this.jobId = jobId;
+    this.changeJobData();
+    return this.jobId;
+  };
+
+  changeJobData() {
+    if (!this.state.runeDataLoaded) return;
+
+    console.log("Loading job data...");
+
+    let runeDesc: any = [];
+
+    runeDesc = this.runeDesc;
+
+    let newRuneArray: any = [];
+    let uniqueId: number = 0;
+    let nameProp = this.getLang("name");
+    let descProp = this.getLang("specialRuneTipText");
+
+    runeDesc.forEach((eachRune: any) => {
+      const runeExisted = newRuneArray.find(
+        (_runeDesc: any) => _runeDesc.name === eachRune.name
+      );
+      if (runeExisted) {
+        // Rune already exist.
+        runeExisted.idArray.push(eachRune.id);
+        eachRune.amount = runeExisted.amount++;
+      } else {
+        // Rune is not exist yet. Push new rune object.
+        if (!!eachRune.name) {
+          let newRune = {
+            uid: uniqueId++,
+            name: eachRune.name,
+            [nameProp]: eachRune[nameProp],
+            idArray: [eachRune.id],
+            amount: 1
+          };
+          eachRune.amount = 1;
+          if (!!eachRune[descProp]) {
+            newRune[descProp] = eachRune[descProp];
+          }
+          newRuneArray.push(newRune);
+        }
+      }
+    });
+
+    newRuneArray.sort(function(a: any, b: any) {
+      return a[nameProp] < b[nameProp] ? -1 : 1;
+    });
+
+    this.runeNameTables = newRuneArray;
+
+    this.props.setRuneNameList(newRuneArray);
+
+    this.generateRuneSummary();
+  }
+
+  get runeDesc() {
+    const jobId = this.jobId;
+    let newRuneObj: any = [];
+
+    this.getAllRuneId().forEach((runeId: any, index: number) => {
+      const runeData = this.runeData[runeId];
+      const runeJobData = runeData.job[jobId];
+
+      // Return if data not available yet.
+      if (!runeJobData) return;
+
+      let newRuneDesc: any = {};
+      newRuneDesc.id = runeId;
+      if (runeJobData.icon) newRuneDesc.icon = runeJobData.icon;
+      if (runeJobData.name) newRuneDesc.name = runeJobData.name;
+      if (runeJobData.value) newRuneDesc.value = runeJobData.value;
+      if (runeJobData.special_id)
+        newRuneDesc.specialId = runeJobData.special_id;
+      if (runeJobData.special_text)
+        newRuneDesc.specialRuneTipText = runeJobData.special_text;
+
+      //newRuneObj[runeId] = newRuneDesc;
+      newRuneObj.push(newRuneDesc);
+    });
+    return newRuneObj;
   }
 
   private loadingKeys: any = {};
@@ -174,81 +271,6 @@ export class RuneSimulator extends React.PureComponent<
       }, 200);
     }
   };
-
-  loadJobRuneData(jobId: number) {
-    const jobKey: any = "Rune" + jobId;
-    const loadKey = "loadJobRune";
-
-    this.showLoading(loadKey, "Loading job data...");
-    this.jobId = jobId;
-
-    let runeDesc: any = [];
-
-    localForage
-      .getItem(DBKey[jobKey])
-      .then((data: any) => {
-        if (!data) {
-          console.log("Not using cached data.");
-          runeDesc = require(`../data/runeData_${jobId}.json`);
-
-          localForage.setItem(DBKey[jobKey], runeDesc);
-        } else {
-          console.log("Using cached job desc.");
-          runeDesc = data;
-        }
-      })
-      .finally(() => {
-        this.runeDesc = runeDesc;
-        this.jobDataLoaded = true;
-
-        if (this.JSONLoaded) {
-          this.setState({
-            runeDataLoaded: true
-          });
-          let newRuneArray: any = [];
-          let uniqueId: number = 0;
-          let nameProp = this.getLang("name");
-          let descProp = this.getLang("specialRuneTipText");
-
-          runeDesc.forEach((eachRune: any) => {
-            let runeExisted = newRuneArray.find(
-              (_runeDesc: any) => _runeDesc.name === eachRune.name
-            );
-            if (runeExisted) {
-              // Rune already exist.
-              runeExisted.idArray.push(eachRune.id);
-              eachRune.amount = runeExisted.amount++;
-            } else {
-              // Rune is not exist yet. Push new rune object.
-              if (!!eachRune.name) {
-                let newRune = {
-                  uid: uniqueId++,
-                  name: eachRune.name,
-                  [nameProp]: eachRune[nameProp],
-                  idArray: [eachRune.id],
-                  amount: 1
-                };
-                eachRune.amount = 1;
-                if (!!eachRune[descProp]) {
-                  newRune[descProp] = eachRune[descProp];
-                }
-                newRuneArray.push(newRune);
-              }
-            }
-          });
-
-          newRuneArray.sort(function(a: any, b: any) {
-            return a[nameProp] < b[nameProp] ? -1 : 1;
-          });
-
-          this.runeNameTables = newRuneArray;
-          this.props.getRuneNameList(newRuneArray);
-        }
-
-        this.generateRuneSummary();
-        this.hideLoading(loadKey);
-      });
-  }
 
   getLang = (property: string): string => {
     return getPropertyLang(property, this.dataLang);
@@ -311,10 +333,16 @@ export class RuneSimulator extends React.PureComponent<
   getRuneDesc = (id: string | number) =>
     this.runeDesc.find((eachRune: any) => Number(eachRune.id) === Number(id));
 
+  private allRuneId: number[] = [];
+
   getAllRuneId = (sort: boolean = true): number[] => {
-    let allRuneId = Object.keys(this.runeData).map(Number);
-    if (sort) allRuneId.sort((a: number, b: number) => (a < b ? -1 : 1));
-    return allRuneId;
+    let allRuneId = this.allRuneId;
+
+    if (!allRuneId.length) {
+      allRuneId = Object.keys(this.runeData).map(Number);
+      if (sort) allRuneId.sort((a: number, b: number) => (a < b ? -1 : 1));
+    }
+    return (this.allRuneId = allRuneId);
   };
 
   getRuneCoor = (id: string | number) => {
@@ -334,8 +362,9 @@ export class RuneSimulator extends React.PureComponent<
         return "c";
       case 45003:
         return "d";
+      default:
+        return "c";
     }
-    return "c";
   };
 
   isActiveRuneClass = (id: string) =>
@@ -398,7 +427,7 @@ export class RuneSimulator extends React.PureComponent<
         if (activeRunes.indexOf(currentPath))
           uniquePush(activeRunes, currentPath);
 
-        if (currentPath == target) {
+        if (currentPath === target) {
           completeRoute = true;
           this.activeRunes = activeRunes;
           this.updateRunePointDOM();
@@ -418,7 +447,7 @@ export class RuneSimulator extends React.PureComponent<
     let unvisitedCombo: any = {};
 
     const getCostFromStart = (to: number) => {
-      const shortestCost = shortest_path.find((path: any) => path.to == to);
+      const shortestCost = shortest_path.find((path: any) => path.to === to);
       //console.log('shortestCost',shortestCost)
       return shortestCost;
     };
@@ -544,7 +573,7 @@ export class RuneSimulator extends React.PureComponent<
           pathLowestCost > costLinkFromStart + runeLinkCost
         ) {
           if (this.getRuneTier(toId) <= this.tier) {
-            if (unvisitedCombo[toId] == undefined) {
+            if (unvisitedCombo[toId] === undefined) {
               unvisitedCombo[toId] = costLinkFromStart;
             } else {
               if (unvisitedCombo[toId] > costLinkFromStart) {
@@ -575,8 +604,8 @@ export class RuneSimulator extends React.PureComponent<
     return shortest_path;
   };
 
-  getRuneAmountByCNName = (CNname: string): number => {
-    let match = this.runeNameTables.find((a: any) => a.name === CNname);
+  getRuneAmountByName = (name: string): number => {
+    let match = this.runeNameTables.find((a: any) => a.name === name);
     return match.amount ? match.amount : 0;
   };
 
@@ -601,98 +630,99 @@ export class RuneSimulator extends React.PureComponent<
     return updateUrlShareKey(this.jobId, this.getCurrentTierCode() + shareKey);
   };
 
-  generateRuneSummary = () => {
-    /*
-    generateRuneSummary() will generate Rune Stat summary and rune cost.
-    */
-    let summaryArray: any = [];
-    let costArray = {};
-    let medal = 0;
-    let cont = 0;
-    let step = 0;
+  generateRuneSummary = async () => {
+    const _async = () => {
+      /*
+      generateRuneSummary() will generate Rune Stat summary and rune cost.
+      */
+      let summaryArray: any = [];
+      let costArray = {};
+      let medal = 0;
+      let cont = 0;
+      let step = 0;
 
-    this.activeRunes.forEach((runeId: number) => {
-      let runeDesc = this.getRuneDesc(runeId);
-      let nameProp = this.getLang("name");
-      let descProp = this.getLang("specialRuneTipText");
+      this.activeRunes.forEach((runeId: number) => {
+        let runeDesc = this.getRuneDesc(runeId);
+        let nameProp = this.getLang("name");
+        let descProp = this.getLang("specialRuneTipText");
 
-      // Accumulate Rune Cost
-      const runeCost = this.getRuneCost(runeId);
-      medal += runeCost[RuneCostType.Medal];
-      cont += runeCost[RuneCostType.Contribution];
-      step += runeCost[RuneCostType.Step];
+        if (!runeDesc) return;
 
-      // Summarize Rune. Check if runeDesc is not undefined.
-      if (!!runeDesc && !!runeDesc.name) {
-        let runeExisted = summaryArray.find(
-          (_runeDesc: any) => _runeDesc.name === runeDesc.name
-        );
+        // Accumulate Rune Cost
+        const runeCost = this.getRuneCost(runeId);
+        medal += runeCost[RuneCostType.Medal];
+        cont += runeCost[RuneCostType.Contribution];
+        step += 1;
 
-        // Check if the rune is already in the array.
-        if (runeExisted) {
-          if (
-            !!runeDesc.specialId &&
-            runeDesc.specialSkillParam !== "_EmptyTable"
-          ) {
-            // Special Rune
-            runeExisted.value = array_sum(
-              runeExisted.value,
-              runeDesc.specialSkillParam
-            );
-            runeExisted.runeCount++;
-          } else {
-            // Basic Rune
-            runeExisted.value = parseFloat(
-              (
-                parseFloat(runeExisted.value) + parseFloat(runeDesc.value)
-              ).toFixed(3)
-            );
-            runeExisted.runeCount++;
-          }
-        } else {
-          // Initialize new Rune Summary
-          let runeAmount = this.getRuneAmountByCNName(runeDesc.name);
-          let newData = {
-            name: runeDesc.name,
-            [nameProp]: runeDesc[nameProp],
-            runeCount: 1,
-            amount: runeAmount
-          };
+        // Summarize Rune. Check if runeDesc is not undefined.
+        if (!!runeDesc && !!runeDesc.name) {
+          let runeExisted = summaryArray.find(
+            (_runeDesc: any) => _runeDesc.name === runeDesc.name
+          );
 
-          // If given value is less than 0.1, it is most probably a percentage value.
-          if (runeDesc.value && !!(runeDesc.value < 0.1)) {
-            newData.percent = true;
-          }
-
-          // Check whether it is basic or special rune.
-          if (!!runeDesc.specialId) {
-            // Special Rune
-            newData.specialRuneTipText = runeDesc.specialRuneTipText;
-            newData[descProp] = runeDesc[descProp];
-
-            // Check if special rune contains special value/param
-            if (runeDesc.specialSkillParam !== "_EmptyTable") {
-              newData.value = runeDesc.specialSkillParam;
+          // Check if the rune is already in the array.
+          if (runeExisted) {
+            if (!!runeDesc.specialId && runeDesc.value !== "_EmptyTable") {
+              // Special Rune
+              runeExisted.value = array_sum(runeExisted.value, runeDesc.value);
+              runeExisted.runeCount++;
             } else {
-              // Special rune that has no parameter.
-              //console.log(runeDesc);
+              // Basic Rune
+              runeExisted.value = parseFloat(
+                (
+                  parseFloat(runeExisted.value) + parseFloat(runeDesc.value)
+                ).toFixed(3)
+              );
+              runeExisted.runeCount++;
             }
           } else {
-            // Basic Rune
-            if (!!runeDesc.value) {
-              newData.value = runeDesc.value;
+            // Initialize new Rune Summary
+            let runeAmount = this.getRuneAmountByName(runeDesc.name);
+            let newData = {
+              name: runeDesc.name,
+              [nameProp]: runeDesc[nameProp],
+              runeCount: 1,
+              amount: runeAmount
+            };
+
+            // If given value is less than 0.1, it is most probably a percentage value.
+            if (runeDesc.value && !!(runeDesc.value < 0.1)) {
+              newData.percent = true;
             }
+
+            // Check whether it is basic or special rune.
+            if (!!runeDesc.specialId) {
+              // Special Rune
+              newData.specialRuneTipText = runeDesc.specialRuneTipText;
+              newData[descProp] = runeDesc[descProp];
+
+              // Check if special rune contains special value/param
+              if (runeDesc.value !== "_EmptyTable") {
+                newData.value = runeDesc.value;
+              } else {
+                // Special rune that has no parameter.
+                //console.log(runeDesc);
+              }
+            } else {
+              // Basic Rune
+              if (!!runeDesc.value) {
+                newData.value = runeDesc.value;
+              }
+            }
+            summaryArray.push(newData);
           }
-          summaryArray.push(newData);
         }
-      }
-    });
+      });
 
-    costArray = { medal, cont, step };
-    this.props.setCost(costArray);
-    this.props.setSummary(summaryArray);
+      costArray = { medal, cont, step };
+      this.props.setCost(costArray);
+      this.props.setSummary(summaryArray);
 
-    //console.log("%c> Cost:", "background: yellow; color: darkpink", costArray);
+      //console.log("%c> Cost:", "background: yellow; color: darkpink", costArray);
+    };
+
+    // Async to speedup rune point rendering. Will use worker in future update.
+    setTimeout(_async);
   };
 
   selectAllRune = () => {
@@ -768,7 +798,7 @@ export class RuneSimulator extends React.PureComponent<
       });
     };
 
-    // Only activate/delete affected rune. Instead of looping through all activated runes.
+    // Only activate/delete affected rune. Instead of looping through all active runes.
     const prev = this.prevActiveRunes;
     const curr = this.activeRunes;
 
@@ -786,7 +816,7 @@ export class RuneSimulator extends React.PureComponent<
         .filter(x => !prev.includes(x))
         .concat(prev.filter(x => !curr.includes(x)));
     }
-    //runeSet.forEach((runeId: number) => activateRunePoint(runeId));  // Cara lama. slow.... sebab ubah attr satu2 tiap2 loop
+    //runeSet.forEach((runeId: number) => activateRunePoint(runeId));  // Old method, looping through each runepoint is slow.
     runeDOMs = affectedRuneSet
       .map((runeId: number) => getRunePointDOM(runeId))
       .join(",");
@@ -807,7 +837,7 @@ export class RuneSimulator extends React.PureComponent<
   deactivateRune = (id: number) => {
     let q = [this.startPoint];
     let visited: number[] = [];
-    let newActivateRunes: number[] = [];
+    let newActiveRunes: number[] = [];
 
     let activeRunes = this.activeRunes;
     let delIndex = activeRunes.indexOf(id);
@@ -822,7 +852,7 @@ export class RuneSimulator extends React.PureComponent<
     this.time_reset();
     while (q.length) {
       let qpop = q.pop();
-      uniquePush(newActivateRunes, qpop!);
+      uniquePush(newActiveRunes, qpop!);
       if (qpop !== undefined) {
         uniquePush(visited, qpop!);
         this.runeLinks[qpop!].forEach((linkId: number) => {
@@ -831,11 +861,9 @@ export class RuneSimulator extends React.PureComponent<
         });
       }
     }
-    this.time_print("Preparing Data");
     this.time_reset();
-    this.activeRunes = newActivateRunes;
+    this.activeRunes = newActiveRunes;
     this.updateRunePointDOM(true);
-    this.time_print("Update Render");
   };
 
   highlightRune = (selections: any) => {
@@ -881,7 +909,7 @@ export class RuneSimulator extends React.PureComponent<
     //this.viewportToId(id)
 
     id = Number(id);
-    if (id == this.startPoint) {
+    if (id === this.startPoint) {
       this.resetRune();
     } else {
       if (this.getRuneTier(id) > this.getSelectedTier()) {
@@ -968,6 +996,7 @@ export class RuneSimulator extends React.PureComponent<
                   />
                 );
               }
+              return null;
             });
           })}
         </svg>

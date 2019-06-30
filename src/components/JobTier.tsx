@@ -23,12 +23,12 @@ class JobTier extends React.PureComponent<JobTierProps, JobTierState> {
 
   getJobTierList = () => {
     let element: JSX.Element[] = [];
-    let finalClass = "";
+    //let finalClass = "";
 
     GameClasses.getById(this.props.jobId).forEach(
       (eaJob: string, count: Number) => {
         let tier = (Tier as any)["t" + count];
-        finalClass = eaJob;
+        //finalClass = eaJob;
 
         if (count > 0)
           element.push(

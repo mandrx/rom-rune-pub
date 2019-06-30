@@ -36,7 +36,7 @@ class RunePoint extends React.PureComponent<RunePointProps, RunePointState> {
     return !!this.props.cost[RuneCostType.Medal];
   }
   get startingPoint(): string {
-    return this.props.id == 10000 ? " startingPoint" : "";
+    return this.props.id === 10000 ? " startingPoint" : "";
   }
   get runeTier(): string {
     return this.props.tier.toString();
@@ -60,20 +60,16 @@ class RunePoint extends React.PureComponent<RunePointProps, RunePointState> {
         let specialId = runeDesc["specialId"];
 
         if (!specialId) {
-          //console.log("runeValue", runeValue);
-
           let runeValueStr =
             runeValue < 0.1 ? Number(runeValue) * 100 + "%" : runeValue;
 
           popoverContent = `${runeName} +${runeValueStr}`;
         } else {
-          let specialName = (popoverTitle =
-            runeDesc[this.getLang("specialName")]);
-          let specialSkillParam = runeDesc["specialSkillParam"];
-          let specialRuneTipId = runeDesc["specialRuneTipId"];
+          let specialSkillParam = runeDesc["value"];
           let specialRuneTipText: string =
-            runeDesc[this.getLang("specialRuneTipText")];
-
+          runeDesc[this.getLang("specialRuneTipText")];
+          
+          popoverTitle = runeDesc[this.getLang("name")];
           popoverContent = parse(
             replaceStringParam(specialRuneTipText, specialSkillParam)
           );

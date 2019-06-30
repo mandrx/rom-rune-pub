@@ -33,6 +33,7 @@ export const getDecodeUrlData = (): any => {
         case "d":
           tier = 45003;
           break;
+        default:
       }
 
       shareKey = shareKey

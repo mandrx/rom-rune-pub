@@ -100,11 +100,13 @@ class App extends React.PureComponent {
     this.state.tier = tier;
     this.state.costType = costType;
   }
+
+  
   private firstInit = false;
 
   componentDidMount() {
     const runeSimulator = this.refs.runeSimulator as RuneSimulator;
-    runeSimulator.loadJobRuneData(this.state.jobId);
+    runeSimulator.changeJob(this.state.jobId);
     runeSimulator.changeCostType(this.state.costType);
     runeSimulator.activateRuneFromShareKey(this.shareKey);
     this.runeSimulator = runeSimulator;
@@ -120,7 +122,7 @@ class App extends React.PureComponent {
     this.setState({
       jobId: value
     });
-    this.runeSimulator!.loadJobRuneData(value);
+    this.runeSimulator!.changeJob(value);
     (this.refs.runeSearch as RuneSearch).clearSelection();
   };
 
@@ -163,7 +165,7 @@ class App extends React.PureComponent {
     return this.baseHeight * this.state.zoomScale;
   }
 
-  getRuneNameList = (nameList: any) => {
+  setRuneNameList = (nameList: any) => {
     this.setState({
       runeNameList: nameList
     });
@@ -178,6 +180,7 @@ class App extends React.PureComponent {
         case "y":
           this.runeSimulator!.redo();
           break;
+        default:
       }
     }
   };
@@ -253,7 +256,9 @@ class App extends React.PureComponent {
     // scroll to bottom
     setTimeout(() => {
       $(".rune-search-box .ant-select-selection--multiple")!.scrollTop(
-        $(".rune-search-box .ant-select-selection--multiple").prop("scrollHeight") + 50
+        $(".rune-search-box .ant-select-selection--multiple").prop(
+          "scrollHeight"
+        ) + 50
       );
     }, 10);
 
@@ -640,7 +645,7 @@ class App extends React.PureComponent {
                         setZoom={this.setZoom}
                         setCost={this.setCost}
                         setSummary={this.setSummary}
-                        getRuneNameList={this.getRuneNameList}
+                        setRuneNameList={this.setRuneNameList}
                         tier={this.defaultTier}
                       />
                     </div>

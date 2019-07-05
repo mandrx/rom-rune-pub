@@ -38,3 +38,6 @@ src/data/unused/lastUpdate.json
 index.html
 src/data/unused/
 index.htm
+
+# Editor
+.idea/

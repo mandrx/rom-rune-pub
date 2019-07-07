@@ -17,7 +17,6 @@ import "./App.scss";
 import $ from "jquery";
 import domtoimage from "dom-to-image";
 import "dragscroll";
-//import html2canvas from "html2canvas";
 import { RuneSimulator } from "./components/RuneSimulator";
 import {
   RuneCostType,
@@ -78,8 +77,6 @@ class App extends React.PureComponent {
         : this.defaultCost
     );
     const urlData = getDecodeUrlData();
-
-    console.log("urlData", urlData);
 
     this.shareKey = urlData.shareKey;
 

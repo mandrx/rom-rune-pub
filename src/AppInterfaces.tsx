@@ -269,6 +269,8 @@ export class GameClasses {
       case 45003:
         _tier = 3; // TEMP
         break;
+      default:
+        _tier = 1;
     }
     return _tier;
   };

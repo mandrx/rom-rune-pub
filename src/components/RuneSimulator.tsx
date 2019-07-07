@@ -16,7 +16,6 @@ import { updateUrlShareKey } from "../UrlManager";
 import { RuneHistory } from "../RuneHistory";
 import LZString from "lz-string";
 import RunePoint from "./RunePoint";
-import RuneSummary from "./RuneSummary";
 
 export interface RuneSimulatorProps {
   setZoom: Function;
@@ -36,16 +35,20 @@ export class RuneSimulator extends React.PureComponent<
   RuneSimulatorProps,
   RuneSimulatorState
 > {
+  private version: string = "1.7.7c";
   private dataLang = this.props.lang;
   private startPoint: number = 10000;
   private tier: number = 20000;
   private jobId: number = 0;
 
+  private shareKey: string = "";
+  private storageKey: string = "simulator_data";
+  private versionKey: string = "v";
+
   private currentZoom: number = 3;
   private zoomRange: number[] = [0.27, 0.35, 0.45, 0.6, 0.8, 1, 1.25];
 
   private runeData: any = {};
-  //private runeDesc: any = {};
 
   private runeLinks: any = [];
   private activeRunes: number[] = [this.startPoint];
@@ -56,11 +59,6 @@ export class RuneSimulator extends React.PureComponent<
   };
   private secondaryWeightIntensity = 10000;
 
-  private shareKey: string = "";
-  private storageKey: string = "simulatorData";
-
-  private JSONLoaded = false;
-
   private runeNameTables: any = [];
   public History: RuneHistory = new RuneHistory();
 
@@ -70,7 +68,8 @@ export class RuneSimulator extends React.PureComponent<
 
   constructor(props: any) {
     super(props);
-    this.loadRuneData();
+    this.time_reset();
+    this.initRuneData();
     this.tier = this.props.tier!;
   }
 
@@ -81,22 +80,9 @@ export class RuneSimulator extends React.PureComponent<
 
   componentDidUpdate() {
     this.time_print("componentDidUpdate");
+    this.time_reset();
     this.checkShareKey();
     this.zoom();
-
-    // Clear older version data
-    localForage.removeItem("runeData_11");
-    localForage.removeItem("runeData_12");
-    localForage.removeItem("runeData_21");
-    localForage.removeItem("runeData_31");
-    localForage.removeItem("runeData_32");
-    localForage.removeItem("runeData_41");
-    localForage.removeItem("runeData_42");
-    localForage.removeItem("runeData_51");
-    localForage.removeItem("runeData_52");
-    localForage.removeItem("runeData_61");
-    localForage.removeItem("runeData_62");
-    localForage.removeItem("runebasic");
   }
 
   checkShareKey = () => {
@@ -126,41 +112,53 @@ export class RuneSimulator extends React.PureComponent<
     }
   };
 
-  loadRuneData() {
+  isDataOutdated = () => {
+    return localForage
+      .getItem(this.versionKey)
+      .then((version: any) => !(version === this.version));
+  };
+
+  initRuneData() {
     let loadKey = "runeData";
     this.showLoading(loadKey, "Loading rune data...");
 
-    let runeData = {};
+    const loadRuneData = () => {
+      const runejson = require("../data/runes.json");
+      localForage.setItem(this.versionKey, this.version);
+      localForage.setItem(this.storageKey, runejson);
+      console.log("> Rune data has been updated to version", this.version);
+      return runejson;
+    };
 
-    localForage
-      .getItem(this.storageKey)
-      .then((data: any) => {
-        if (!data) {
-          console.log("Not using cached data.");
-          runeData = require("../data/runes.json");
-          localForage.setItem(this.storageKey, {
-            runeData: runeData
-          });
-        } else {
-          console.log("Using cached data.");
-          runeData = data.runeData;
-        }
+    // Check rune data version.
+    this.isDataOutdated()
+      .then(outdated => {
+        // Clear localdb if data is outdated.
+        if (outdated) localForage.clear();
       })
       .finally(() => {
-        this.runeData = runeData;
-        this.JSONLoaded = true;
+        // Retrieve data from localdb.
+        localForage
+          .getItem(this.storageKey)
+          .then((storedData: any) => {
+            if (!storedData) {
+              this.runeData = loadRuneData();
+            } else {
+              this.runeData = storedData;
+            }
+          })
+          .finally(() => {
+            this.setState({
+              runeDataLoaded: true
+            });
 
-        this.setState({
-          runeDataLoaded: true
-        });
-
-        this.changeJobData();
-
-        this.hideLoading(loadKey);
-        this.updateRunePointDOM();
-        setTimeout(() => {
-          this.props.viewportTo();
-        }, 500);
+            this.changeJobData();
+            this.updateRunePointDOM();
+            this.hideLoading(loadKey);
+            setTimeout(() => {
+              this.props.viewportTo();
+            }, 500);
+          });
       });
   }
 
@@ -1072,10 +1070,7 @@ export class RuneSimulator extends React.PureComponent<
     if (this.getAllRuneId().length === 0) return "Loading...";
     return (
       <React.Fragment>
-        <div
-          className="rune-simulator-container"
-          ref="rune-container"
-        >
+        <div className="rune-simulator-container" ref="rune-container">
           <div
             className={`rune-simulator `}
             data-tier={this.tier}

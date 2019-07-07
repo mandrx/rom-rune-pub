@@ -372,7 +372,11 @@ body {
 
   .ant-layout-header {
     height: 65px;
+    padding: 0;
     //line-height: 65px;
+    .toggle-menu-button{
+      background-color: $primary-color;
+    }
     @include media("<lg") {
       height: 44px;
     }
@@ -578,7 +582,56 @@ body {
     width: 100%;
     position: relative;
 
-    .linkContainer {
+    .screenshot-cost {
+      opacity: 0;
+      user-select: none;
+      position: absolute;
+      top: -2020px;
+      left: -2000px;
+      font-size: 150px;
+      text-align: left;
+      line-height: 113px;
+      .summary-property {
+        .cost-icon {
+          height: 0.8em;
+          width: 0.8em;
+          margin-left: 40px;
+          margin-right: 10px;
+        }
+        b {
+          margin-right: 10px;
+        }
+        .value {
+          color: #b0bec5;
+        }
+        b.value {
+          color:$primary-color;
+          line-height: 150px;
+        }        
+      }
+      .credit {
+        font-size: 38px;
+        line-height: 50px;
+        padding: 0;
+        padding-top: 10px;
+        padding-bottom: 13.6px;
+        border-radius: 8px;
+        background-color: #545556;
+        color: #fff;
+        width: 420px;
+        margin-left: 12px;
+        margin-top: 30px;
+        text-align: center;
+      }
+    }
+
+    &.on-screenshot {
+      .screenshot-cost {
+        opacity: 1;
+      }
+    }
+
+    .link-container {
       position: absolute;
       top: 13px;
       width: 0;
@@ -604,7 +657,7 @@ body {
         }
       }
     }
-    .pointContainer {
+    .point-container {
       position: absolute;
       top: 0px;
       margin-left: -21px;
@@ -749,6 +802,17 @@ body {
           border-color: $rune-active-color-5;
         }
       }
+    }
+  }
+
+  &.on-screenshot {
+    .rune-simulator {
+      transform: scale(0.4) !important;
+      margin-left: 200px;
+      margin-top: 200px;
+    }
+    .screenshot-cost {
+      opacity: 1;
     }
   }
 

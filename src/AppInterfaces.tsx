@@ -243,10 +243,39 @@ export class GameClasses {
   static getIdByName = (name: string): number =>
     (GameClasses.classToId as any)[name];
 
-  static getById = (id: number) => {
+  static getById = (id: number): any[] => {
     let _id: any = `Job_${id}`;
     let _className: any = GameClasses.classesID[_id];
     let _this: any = GameClasses;
     return _this[_className];
+  };
+
+  static getIdByTier = (tier: number): number => {
+    let _tier = 1;
+    switch (tier) {
+      case 1:
+      case 20000:
+        _tier = 1;
+        break;
+      case 2:
+      case 30000:
+        _tier = 2;
+        break;
+      case 3:
+      case 40000:
+        _tier = 3;
+        break;
+      case 4:
+      case 45003:
+        _tier = 3; // TEMP
+        break;
+    }
+    return _tier;
+  };
+
+  static getByIdAndTier = (id: number, tier: number): string => {
+    const _className = GameClasses.getById(id);
+    const _tier = GameClasses.getIdByTier(tier);
+    return _className[_tier];
   };
 }

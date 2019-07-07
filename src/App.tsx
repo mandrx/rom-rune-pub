@@ -90,10 +90,11 @@ class App extends React.PureComponent {
 
     // Check stored value validity.
     jobId = GameClasses.getById(jobId) ? jobId : this.defaultJob;
-    tier =
+    this.defaultTier = tier =
       tier === 20000 || tier === 30000 || tier === 40000
         ? tier
         : this.defaultTier;
+
     costType = costType >= 0 && costType < 4 ? costType : this.defaultCost;
 
     this.state.jobId = jobId;
@@ -101,7 +102,6 @@ class App extends React.PureComponent {
     this.state.costType = costType;
   }
 
-  
   private firstInit = false;
 
   componentDidMount() {
@@ -198,7 +198,7 @@ class App extends React.PureComponent {
   handleZoomOutClick = (e: any) => this.runeSimulator!.zoomOut();
 
   handleResetViewClick = (e: any) => {
-    this.runeSimulator!.zoomReset();
+    //this.runeSimulator!.zoomReset();
     setTimeout(() => {
       this.viewportTo();
     }, 500);
@@ -267,26 +267,44 @@ class App extends React.PureComponent {
 
   blurInput = (e: any) => (document.activeElement as any).blur();
 
-  handleTest2 = (e: any) => {
+  handleSaveImage = (e: any) => {
     const waitMsg = message.loading("Rendering Rune Image, Please wait...", 60);
     const prevScale = this.state.zoomScale;
-    $(".App").addClass("muted");
+    const currentJobName = GameClasses.getByIdAndTier(
+      this.state.jobId,
+      this.state.tier
+    );
+
     $(".rune-simulator").css("transform", "scale(0.5)");
+    $(".App").addClass("muted");
+    $(".rune-simulator-container").addClass("on-screenshot");
+    $(".screenshot-cost .job .value")[0].innerText = currentJobName;
+    $(
+      ".screenshot-cost .cont .value"
+    )[0].innerText = this.state.cost.cont.toLocaleString();
+    $(
+      ".screenshot-cost .medal .value"
+    )[0].innerText = this.state.cost.medal.toLocaleString();
 
     const renderImage = () => {
       domtoimage
         .toPng($(".rune-simulator-container")[0], {
-          bgcolor: "#f1f3f5"
+          bgcolor: "#f1f3f5",
+          height: 1500,
+          width: 1800
         })
         .then(function(dataUrl) {
           const time = Date.now();
           const link = document.createElement("a");
-          link.download = `rune-rocodex.com-${time}.png`;
+          link.download = `romcodex.com-${currentJobName
+            .toLowerCase()
+            .replace(" ", "-")}-rune-${time}.png`;
           link.href = dataUrl;
           link.click();
           waitMsg();
           $(".App").removeClass("muted");
           $(".rune-simulator").css("transform", `scale(${prevScale})`);
+          $(".rune-simulator-container").removeClass("on-screenshot");
         });
     };
 
@@ -464,7 +482,12 @@ class App extends React.PureComponent {
                 </Sider>
 
                 <Layout className={`panel-content ${this.greyoutPanel()}`}>
-                  <Header className="header fluid-header">
+                  <Header
+                    className="header fluid-header"
+                    style={{
+                      paddingLeft: this.state.collapseSideMenu ? "0" : "50px"
+                    }}
+                  >
                     <div className="logo" />
                     <Menu
                       theme="dark"
@@ -475,13 +498,25 @@ class App extends React.PureComponent {
                       {
                         //<Menu.Item key="1">Database</Menu.Item>
                       }
-                      <Menu.Item key="1" onClick={this.handleToggleSideMenu}>
-                        Side Menu (Test)
+                      <Menu.Item
+                        key="1"
+                        className="toggle-menu-button"
+                        onClick={this.handleToggleSideMenu}
+                        style={{
+                          display: this.state.collapseSideMenu
+                            ? "inline-block"
+                            : "none"
+                        }}
+                      >
+                        <Icon type="menu" />
+                        Menu
                       </Menu.Item>
-                      <Menu.Item key="1x" onClick={this.handleTest2}>
-                        Render Image (Test)
+                      <Menu.Item key="1x" onClick={this.handleSaveImage}>
+                        <Icon type="file-image" />
+                        Save as Image
                       </Menu.Item>
                       <Menu.Item key="2x" onClick={this.handleShareURL}>
+                        <Icon type="share-alt" />
                         Share Link
                       </Menu.Item>
                       {/*
@@ -592,7 +627,7 @@ class App extends React.PureComponent {
                               onClick={this.handleZoomInClick}
                             />
                           </Tooltip>
-                          <Tooltip title="Reset view">
+                          <Tooltip title="Move to center">
                             <Button
                               icon="border-outer"
                               onClick={this.handleResetViewClick}

@@ -16,6 +16,7 @@ import { updateUrlShareKey } from "../UrlManager";
 import { RuneHistory } from "../RuneHistory";
 import LZString from "lz-string";
 import RunePoint from "./RunePoint";
+import RuneSummary from "./RuneSummary";
 
 export interface RuneSimulatorProps {
   setZoom: Function;
@@ -815,7 +816,7 @@ export class RuneSimulator extends React.PureComponent<
         .filter(x => !prev.includes(x))
         .concat(prev.filter(x => !curr.includes(x)));
     }
-    
+
     // string concat() is faster than array join()
     runeDOMs = "".concat(
       affectedRuneSet.map((runeId: number) => getRunePointDOM(runeId))
@@ -823,9 +824,8 @@ export class RuneSimulator extends React.PureComponent<
 
     // Check to prevent overwriting History when we undo/redo
     if (recordStateHistory) {
-      
-      // Add only affected runes to the history state      
-      this.History.addState(affectedRuneSet, deletion);      
+      // Add only affected runes to the history state
+      this.History.addState(affectedRuneSet, deletion);
     }
 
     affectedRuneSet.forEach((runeId: number) => getLinkDOM(runeId, deletion));
@@ -837,9 +837,8 @@ export class RuneSimulator extends React.PureComponent<
     if (runeDOMs) Array.from(document.querySelectorAll(runeDOMs)).map(activate);
     if (linkDOMs) Array.from(document.querySelectorAll(linkDOMs)).map(activate);
     */
-    $(runeDOMs).attr("data-active", String(!deletion));    
+    $(runeDOMs).attr("data-active", String(!deletion));
     $(linkDOMs).attr("data-active", String(!deletion));
-    
   };
 
   deactivateRune = (id: number) => {
@@ -856,7 +855,7 @@ export class RuneSimulator extends React.PureComponent<
     // Deactivate given ID
     activeRunes.splice(delIndex, 1);
 
-    // Check path after given ID deactivated    
+    // Check path after given ID deactivated
     while (q.length) {
       let qpop = q.pop();
       uniquePush(newActiveRunes, qpop!);
@@ -934,9 +933,30 @@ export class RuneSimulator extends React.PureComponent<
     }
   };
 
+  renderScreenshotCost = () => {
+    return (
+      <div className="screenshot-cost">
+        <div className="summary-property job">
+          <b className="value">Mechanic</b>
+        </div>
+        <div className="summary-property cont">
+          <b>Contribution</b>
+          <i className="cost-icon icon-contribution" />
+          <span className="value">312,667</span>
+        </div>
+        <div className="summary-property medal">
+          <b>Gold Medal</b>
+          <i className="cost-icon icon-medal" />
+          <span className="value">531</span>
+        </div>
+        <div className="credit">romcodex.com/runes</div>
+      </div>
+    );
+  };
+
   renderPoints = () => {
     return (
-      <div className="pointContainer">
+      <div className="point-container">
         {this.getAllRuneId(false).map((a: any) => {
           return (
             <RunePoint
@@ -960,7 +980,7 @@ export class RuneSimulator extends React.PureComponent<
     let drawnLineMidPoint: string[] = [];
 
     return (
-      <div className="linkContainer">
+      <div className="link-container">
         <svg className="rune-links">
           {this.getAllRuneId(false).map(_a => {
             const minTier = (a: number, b: number): number => {
@@ -1052,7 +1072,10 @@ export class RuneSimulator extends React.PureComponent<
     if (this.getAllRuneId().length === 0) return "Loading...";
     return (
       <React.Fragment>
-        <div className="rune-simulator-container " ref="rune-container">
+        <div
+          className="rune-simulator-container"
+          ref="rune-container"
+        >
           <div
             className={`rune-simulator `}
             data-tier={this.tier}
@@ -1063,6 +1086,7 @@ export class RuneSimulator extends React.PureComponent<
               WebkitTransformOrigin: "-1750px -1690px"
             }}
           >
+            {this.renderScreenshotCost()}
             {this.renderLinks()}
             {this.renderPoints()}
           </div>

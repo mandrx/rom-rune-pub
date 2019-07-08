@@ -661,7 +661,7 @@ export class RuneSimulator extends React.PureComponent<
 
           // Check if the rune is already in the array.
           if (runeExisted) {
-            if (!!runeDesc.specialId && runeDesc.value !== "_EmptyTable") {
+            if (!!runeDesc.specialId && runeDesc.value && runeDesc.value !== "_EmptyTable") {
               // Special Rune
               runeExisted.value = array_sum(runeExisted.value, runeDesc.value);
               runeExisted.runeCount++;

@@ -88,7 +88,7 @@ class App extends React.PureComponent {
     // Check stored value validity.
     jobId = GameClasses.getById(jobId) ? jobId : this.defaultJob;
     this.defaultTier = tier =
-      tier === 20000 || tier === 30000 || tier === 40000
+      tier === 20000 || tier === 30000 || tier === 40000 || tier === 45003
         ? tier
         : this.defaultTier;
 
@@ -290,7 +290,7 @@ class App extends React.PureComponent {
           height: 1500,
           width: 1800
         })
-        .then(function(dataUrl) {
+        .then(function (dataUrl) {
           const time = Date.now();
           const link = document.createElement("a");
           link.download = `romcodex.com-${currentJobName

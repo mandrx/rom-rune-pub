@@ -118,7 +118,7 @@ export enum JobID {
   Assassin = 31,
   Rogue = 32,
   Hunter = 41,
-  Poet = 42,
+  Bard = 42,
   Dancer = 43,
   Priest = 51,
   Monk = 52,
@@ -141,7 +141,8 @@ export enum ROMJob {
   Job31 = "assassin",
   Job32 = "rogue",
   Job41 = "hunter",
-  Job42 = "bard_dancer",
+  Job42 = "bard",
+  Job43 = "dancer",
   Job51 = "priest",
   Job52 = "monk",
   Job61 = "blacksmith",
@@ -158,6 +159,7 @@ export enum DBKey {
   Rune32 = "runeData_32",
   Rune41 = "runeData_41",
   Rune42 = "runeData_42",
+  Rune43 = "runeData_43",
   Rune51 = "runeData_51",
   Rune52 = "runeData_52",
   Rune61 = "runeData_61",
@@ -165,19 +167,19 @@ export enum DBKey {
 }
 
 export class GameClasses {
-  static Knight = ["Swordsman", "Knight", "Lord Knight", "Rune Knight"];
-  static Crusader = ["Swordsman", "Crusader", "Paladin", "Royal Guard"];
-  static Wizard = ["Mage", "Wizard", "High Wizard", "Warlock"];
-  static Sage = ["Mage", "Sage", "Professor", "Sorcerer"];
-  static Assassin = ["Thief", "Assassin", "Assassin Cross", "Guillotine Cross"];
-  static Rogue = ["Thief", "Rogue", "Stalker", "Shadow Chaser"];
-  static Hunter = ["Archer", "Hunter", "Sniper", "Ranger"];
-  static Bard = ["Archer", "Poet", "Clown", "Minstrel"];
-  static Dancer = ["Archer", "Dancer", "Gypsy", "Wanderer"];
-  static Priest = ["Acolyte", "Priest", "High Priest", "Archbishop"];
-  static Monk = ["Acolyte", "Monk", "Champion", "Shura"];
-  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic"];
-  static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic"];
+  static Knight = ["Swordsman", "Knight", "Lord Knight", "Rune Knight", 'Adv. Rune'];
+  static Crusader = ["Swordsman", "Crusader", "Paladin", "Royal Guard", 'Adv. Rune'];
+  static Wizard = ["Mage", "Wizard", "High Wizard", "Warlock", 'Adv. Rune'];
+  static Sage = ["Mage", "Sage", "Professor", "Sorcerer", 'Adv. Rune'];
+  static Assassin = ["Thief", "Assassin", "Assassin Cross", "Guilt. Cross", 'Adv. Rune'];
+  static Rogue = ["Thief", "Rogue", "Stalker", "Shadow Chaser", 'Adv. Rune'];
+  static Hunter = ["Archer", "Hunter", "Sniper", "Ranger", 'Adv. Rune'];
+  static Bard = ["Archer", "Bard", "Clown", "Minstrel", 'Adv. Rune'];
+  static Dancer = ["Archer", "Dancer", "Gypsy", "Wanderer", 'Adv. Rune'];
+  static Priest = ["Acolyte", "Priest", "High Priest", "Archbishop", 'Adv. Rune'];
+  static Monk = ["Acolyte", "Monk", "Champion", "Shura", 'Adv. Rune'];
+  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. Rune"];
+  static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Rune'];
 
   static classToId = {
     Knight: 11,
@@ -187,7 +189,7 @@ export class GameClasses {
     Assassin: 31,
     Rogue: 32,
     Hunter: 41,
-    Poet: 42,
+    Bard: 42,
     Dancer: 43,
     Priest: 51,
     Monk: 52,
@@ -199,12 +201,12 @@ export class GameClasses {
     Knight: [...GameClasses.Knight],
     Crusader: [...GameClasses.Crusader],
     Wizard: [...GameClasses.Wizard],
-    //Sage: [...GameClasses.Sage],
+    Sage: [...GameClasses.Sage],
     Assassin: [...GameClasses.Assassin],
     Rogue: [...GameClasses.Rogue],
     Hunter: [...GameClasses.Hunter],
-    //Bard: [...GameClasses.Bard],
-    //Dancer: [...GameClasses.Dancer],
+    Bard: [...GameClasses.Bard],
+    Dancer: [...GameClasses.Dancer],
     Priest: [...GameClasses.Priest],
     Monk: [...GameClasses.Monk],
     Blacksmith: [...GameClasses.Blacksmith],
@@ -267,7 +269,7 @@ export class GameClasses {
         break;
       case 4:
       case 45003:
-        _tier = 3; // TEMP
+        _tier = 4;
         break;
       default:
         _tier = 1;

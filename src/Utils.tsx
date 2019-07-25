@@ -90,6 +90,8 @@ const getPropertyLang = (property: string, lang: string = "CN"): string => {
 };
 
 const array_sum = (array1: number[], array2: number[]) => {
+  if(array1.length !== array2.length) return array1;
+
   return array1.map((val: number, index: number) => {
     return parseFloat(
       (

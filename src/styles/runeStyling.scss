@@ -118,6 +118,9 @@ body {
     }
   }
   .job-tier-selection {
+    .ant-radio-button-wrapper > span{
+      font-size: 14px;
+    }
   }
 
   .floating-zoom,
@@ -610,15 +613,15 @@ body {
         }        
       }
       .credit {
-        font-size: 38px;
-        line-height: 50px;
+        font-size: 60px;
+        line-height: 60px;
         padding: 0;
-        padding-top: 10px;
-        padding-bottom: 13.6px;
+        padding-top: 15.2px;
+        padding-bottom: 24.1px;
         border-radius: 8px;
         background-color: #545556;
         color: #fff;
-        width: 420px;
+        width: 696.8px;
         margin-left: 12px;
         margin-top: 30px;
         text-align: center;

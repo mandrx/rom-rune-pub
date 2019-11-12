@@ -182,7 +182,7 @@ export class GameClasses {
   static Dancer = ["Archer", "Dancer", "Gypsy", "Wanderer", 'Adv. Wanderer'];
   static Priest = ["Acolyte", "Priest", "High Priest", "Archbishop", 'Adv. AB'];
   static Monk = ["Acolyte", "Monk", "Champion", "Shura", 'Adv. Shura'];
-  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. WS"];
+  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. Mecha"];
   static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Genetic'];
   static Super_Novice = ["Special", "Super_Novice", "S. Novice II","S. Novice III","Adv. SN"];
 

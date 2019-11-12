@@ -267,10 +267,20 @@ class App extends React.PureComponent {
   handleSaveImage = (e: any) => {
     const waitMsg = message.loading("Rendering Rune Image, Please wait...", 60);
     const prevScale = this.state.zoomScale;
-    const currentJobName = GameClasses.getByIdAndTier(
+    let currentJobName = GameClasses.getByIdAndTier(
       this.state.jobId,
       this.state.tier
     );
+
+    currentJobName = currentJobName
+      .replace(' RK', ' Rune Knight')
+      .replace(' RG', ' Royal Guard')
+      .replace(' GX', ' Guilt. Cross')
+      .replace(' SC', ' Shadow Chaser')
+      .replace(' AB', ' Archbishop')
+      .replace(' Mecha', ' Mechanic')
+      .replace(' SN', ' Super Novice')
+      .replace('_', ' ');
 
     $(".rune-simulator").css("transform", "scale(0.5)");
     $(".App").addClass("muted");
@@ -305,7 +315,7 @@ class App extends React.PureComponent {
         });
     };
 
-    setTimeout(renderImage, 500);
+    setTimeout(renderImage, 800);
   };
 
   handleShareURL = (e: any) => {

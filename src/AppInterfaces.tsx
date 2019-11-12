@@ -108,7 +108,8 @@ export enum JobName {
   Priest = "priest",
   Monk = "monk",
   Blacksmith = "blacksmith",
-  Alchemist = "alchemist"
+  Alchemist = "alchemist",
+  Super_Novice = "super_novice"
 }
 export enum JobID {
   Knight = 11,
@@ -123,7 +124,8 @@ export enum JobID {
   Priest = 51,
   Monk = 52,
   Blacksmith = 61,
-  Alchemist = 62
+  Alchemist = 62,
+  Super_Novice = 71,
 }
 
 export enum Tier {
@@ -146,7 +148,8 @@ export enum ROMJob {
   Job51 = "priest",
   Job52 = "monk",
   Job61 = "blacksmith",
-  Job62 = "alchemist"
+  Job62 = "alchemist",
+  Job71 = "super_novice"
 }
 
 export enum DBKey {
@@ -163,23 +166,25 @@ export enum DBKey {
   Rune51 = "runeData_51",
   Rune52 = "runeData_52",
   Rune61 = "runeData_61",
-  Rune62 = "runeData_62"
+  Rune62 = "runeData_62",
+  Rune71 = "runeData_71"
 }
 
 export class GameClasses {
-  static Knight = ["Swordsman", "Knight", "Lord Knight", "Rune Knight", 'Adv. Rune'];
-  static Crusader = ["Swordsman", "Crusader", "Paladin", "Royal Guard", 'Adv. Rune'];
-  static Wizard = ["Mage", "Wizard", "High Wizard", "Warlock", 'Adv. Rune'];
-  static Sage = ["Mage", "Sage", "Professor", "Sorcerer", 'Adv. Rune'];
-  static Assassin = ["Thief", "Assassin", "Assassin Cross", "Guilt. Cross", 'Adv. Rune'];
-  static Rogue = ["Thief", "Rogue", "Stalker", "Shadow Chaser", 'Adv. Rune'];
-  static Hunter = ["Archer", "Hunter", "Sniper", "Ranger", 'Adv. Rune'];
-  static Bard = ["Archer", "Bard", "Clown", "Minstrel", 'Adv. Rune'];
-  static Dancer = ["Archer", "Dancer", "Gypsy", "Wanderer", 'Adv. Rune'];
-  static Priest = ["Acolyte", "Priest", "High Priest", "Archbishop", 'Adv. Rune'];
-  static Monk = ["Acolyte", "Monk", "Champion", "Shura", 'Adv. Rune'];
-  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. Rune"];
-  static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Rune'];
+  static Knight = ["Swordsman", "Knight", "Lord Knight", "Rune Knight", 'Adv. RK'];
+  static Crusader = ["Swordsman", "Crusader", "Paladin", "Royal Guard", 'Adv. RG'];
+  static Wizard = ["Mage", "Wizard", "High Wizard", "Warlock", 'Adv. Warlock'];
+  static Sage = ["Mage", "Sage", "Professor", "Sorcerer", 'Adv. Sorcerer'];
+  static Assassin = ["Thief", "Assassin", "Assassin Cross", "Guilt. Cross", 'Adv. GX'];
+  static Rogue = ["Thief", "Rogue", "Stalker", "Shadow Chaser", 'Adv. SC'];
+  static Hunter = ["Archer", "Hunter", "Sniper", "Ranger", 'Adv. Ranger'];
+  static Bard = ["Archer", "Bard", "Clown", "Minstrel", 'Adv. Minstrel'];
+  static Dancer = ["Archer", "Dancer", "Gypsy", "Wanderer", 'Adv. Wanderer'];
+  static Priest = ["Acolyte", "Priest", "High Priest", "Archbishop", 'Adv. AB'];
+  static Monk = ["Acolyte", "Monk", "Champion", "Shura", 'Adv. Shura'];
+  static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. WS"];
+  static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Genetic'];
+  static Super_Novice = ["Special", "Super_Novice", "S. Novice II","S. Novice III","Adv. SN"];
 
   static classToId = {
     Knight: 11,
@@ -194,7 +199,8 @@ export class GameClasses {
     Priest: 51,
     Monk: 52,
     Blacksmith: 61,
-    Alchemist: 62
+    Alchemist: 62,
+    Super_Novice: 71
   };
 
   static classTree = {
@@ -210,7 +216,8 @@ export class GameClasses {
     Priest: [...GameClasses.Priest],
     Monk: [...GameClasses.Monk],
     Blacksmith: [...GameClasses.Blacksmith],
-    Alchemist: [...GameClasses.Alchemist]
+    Alchemist: [...GameClasses.Alchemist],
+    Super_Novice: [...GameClasses.Super_Novice]
   };
 
   static classesID: any = {
@@ -226,13 +233,15 @@ export class GameClasses {
     Job_51: "Priest",
     Job_52: "Monk",
     Job_61: "Blacksmith",
-    Job_62: "Alchemist"
+    Job_62: "Alchemist",
+    Job_71: "Super_Novice"
   };
 
   static getClassTree = () => {
     let classTree: any = {};
     Object.keys(GameClasses.classTree).forEach(eachJob => {
       let rawClassTree: any = GameClasses.classTree;
+
       if (classTree[rawClassTree[eachJob][0]] === undefined) {
         classTree[rawClassTree[eachJob][0]] = [rawClassTree[eachJob]];
       } else {

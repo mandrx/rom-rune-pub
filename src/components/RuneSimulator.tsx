@@ -227,7 +227,7 @@ export class RuneSimulator extends React.PureComponent<
     this.getAllRuneId().forEach((runeId: any, index: number) => {
       const runeData = this.runeData[runeId];
       const runeJobData = runeData.job[jobId];
-
+      
       // Return if data not available yet.
       if (!runeJobData) return;
 

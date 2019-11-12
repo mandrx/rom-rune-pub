@@ -35,6 +35,7 @@ class JobSelection extends React.PureComponent<
           {classTree[eachJob].map((eachJobLine: string[], i: number) => {
             let _name = classTree[eachJob][i][1];
             let _id = GameClasses.getIdByName(_name);
+            _name = _name.replace('_',' ');
             return (
               <Option key={_id} value={_id}>
                 {_name}

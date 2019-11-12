@@ -29,7 +29,7 @@ class JobTier extends React.PureComponent<JobTierProps, JobTierState> {
       (eaJob: string, count: Number) => {
         let tier = (Tier as any)["t" + count];
         //finalClass = eaJob;
-
+        eaJob = eaJob.replace('_',' ');
         if (count > 0)
           element.push(
             <Radio.Button value={tier} key={tier}>

@@ -109,7 +109,8 @@ export enum JobName {
   Monk = "monk",
   Blacksmith = "blacksmith",
   Alchemist = "alchemist",
-  Super_Novice = "super_novice"
+  Super_Novice = "super_novice",
+  Spiritualist = "spiritualist"
 }
 export enum JobID {
   Knight = 11,
@@ -126,6 +127,7 @@ export enum JobID {
   Blacksmith = 61,
   Alchemist = 62,
   Super_Novice = 71,
+  Spiritualist = 81,
 }
 
 export enum Tier {
@@ -149,7 +151,8 @@ export enum ROMJob {
   Job52 = "monk",
   Job61 = "blacksmith",
   Job62 = "alchemist",
-  Job71 = "super_novice"
+  Job71 = "super_novice",
+  Job81 = "spiritualist"
 }
 
 export enum DBKey {
@@ -167,7 +170,8 @@ export enum DBKey {
   Rune52 = "runeData_52",
   Rune61 = "runeData_61",
   Rune62 = "runeData_62",
-  Rune71 = "runeData_71"
+  Rune71 = "runeData_71",
+  Rune81 = "runeData_81",
 }
 
 export class GameClasses {
@@ -185,6 +189,7 @@ export class GameClasses {
   static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. Mecha"];
   static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Genetic'];
   static Super_Novice = ["Special", "Super_Novice", "S. Novice II","S. Novice III","Adv. SN"];
+  static Spiritualist = ["Doram", "Spiritualist", "Summoner","Animist","Adv. Animist"];
 
   static classToId = {
     Knight: 11,
@@ -200,7 +205,8 @@ export class GameClasses {
     Monk: 52,
     Blacksmith: 61,
     Alchemist: 62,
-    Super_Novice: 71
+    Super_Novice: 71,
+    Spiritualist: 81,
   };
 
   static classTree = {
@@ -217,7 +223,8 @@ export class GameClasses {
     Monk: [...GameClasses.Monk],
     Blacksmith: [...GameClasses.Blacksmith],
     Alchemist: [...GameClasses.Alchemist],
-    Super_Novice: [...GameClasses.Super_Novice]
+    Super_Novice: [...GameClasses.Super_Novice],
+    Spiritualist: [...GameClasses.Spiritualist]
   };
 
   static classesID: any = {
@@ -234,7 +241,8 @@ export class GameClasses {
     Job_52: "Monk",
     Job_61: "Blacksmith",
     Job_62: "Alchemist",
-    Job_71: "Super_Novice"
+    Job_71: "Super_Novice",
+    Job_81: "Spiritualist"
   };
 
   static getClassTree = () => {

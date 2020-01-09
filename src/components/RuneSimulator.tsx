@@ -35,7 +35,7 @@ export class RuneSimulator extends React.PureComponent<
   RuneSimulatorProps,
   RuneSimulatorState
 > {
-  private version: string = "1.11.13B";
+  private version: string = "2.01.10A";
   private dataLang = this.props.lang;
   private startPoint: number = 10000;
   private tier: number = 20000;

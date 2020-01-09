@@ -109,7 +109,7 @@ export enum JobName {
   Monk = "monk",
   Blacksmith = "blacksmith",
   Alchemist = "alchemist",
-  Super_Novice = "super_novice",
+  Adv_Novice = "adv_novice",
   Spiritualist = "spiritualist"
 }
 export enum JobID {
@@ -126,7 +126,7 @@ export enum JobID {
   Monk = 52,
   Blacksmith = 61,
   Alchemist = 62,
-  Super_Novice = 71,
+  Adv_Novice = 71,
   Spiritualist = 81,
 }
 
@@ -151,7 +151,7 @@ export enum ROMJob {
   Job52 = "monk",
   Job61 = "blacksmith",
   Job62 = "alchemist",
-  Job71 = "super_novice",
+  Job71 = "adv_novice",
   Job81 = "spiritualist"
 }
 
@@ -188,7 +188,7 @@ export class GameClasses {
   static Monk = ["Acolyte", "Monk", "Champion", "Shura", 'Adv. Shura'];
   static Blacksmith = ["Merchant", "Blacksmith", "Whitesmith", "Mechanic", "Adv. Mecha"];
   static Alchemist = ["Merchant", "Alchemist", "Creator", "Genetic", 'Adv. Genetic'];
-  static Super_Novice = ["Special", "Super_Novice", "S. Novice II","S. Novice III","Adv. SN"];
+  static Adv_Novice = ["Super Novice", "Adv_Novice", "Super Novice","Ultima Novice","Adv. SN"];
   static Spiritualist = ["Doram", "Spiritualist", "Summoner","Animist","Adv. Animist"];
 
   static classToId = {
@@ -205,7 +205,7 @@ export class GameClasses {
     Monk: 52,
     Blacksmith: 61,
     Alchemist: 62,
-    Super_Novice: 71,
+    Adv_Novice: 71,
     Spiritualist: 81,
   };
 
@@ -223,7 +223,7 @@ export class GameClasses {
     Monk: [...GameClasses.Monk],
     Blacksmith: [...GameClasses.Blacksmith],
     Alchemist: [...GameClasses.Alchemist],
-    Super_Novice: [...GameClasses.Super_Novice],
+    Adv_Novice: [...GameClasses.Adv_Novice],
     Spiritualist: [...GameClasses.Spiritualist]
   };
 
@@ -241,7 +241,7 @@ export class GameClasses {
     Job_52: "Monk",
     Job_61: "Blacksmith",
     Job_62: "Alchemist",
-    Job_71: "Super_Novice",
+    Job_71: "Adv_Novice",
     Job_81: "Spiritualist"
   };
 

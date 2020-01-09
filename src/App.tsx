@@ -39,6 +39,7 @@ import { getDecodeUrlData } from "./UrlManager";
 
 const { Header, Content, Sider } = Layout;
 const { TabPane } = Tabs;
+const { confirm } = Modal;
 
 class App extends React.PureComponent {
   private defaultTier = Tier.t3;
@@ -265,6 +266,22 @@ class App extends React.PureComponent {
   blurInput = (e: any) => (document.activeElement as any).blur();
 
   handleSaveImage = (e: any) => {
+    const __saveImage = this.__saveImage;
+    confirm({
+      title: 'Save as Image',
+      content: 'This process may take a while. Save rune image now?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk() {
+        __saveImage();
+      },
+      onCancel() {
+        
+      },
+    });
+  }
+
+  __saveImage = () => {
     const waitMsg = message.loading("Rendering Rune Image, Please wait...", 60);
     const prevScale = this.state.zoomScale;
     let currentJobName = GameClasses.getByIdAndTier(
@@ -326,6 +343,37 @@ class App extends React.PureComponent {
     setTimeout(() => {
       (this.refs.shareLinkInput as any).input.value = shareUrl;
     }, 1);
+  };
+
+  handleBackToDatabase = (e: any) => {
+    const okFunction:Function = () => {
+      window.location.href = "/"
+    }
+    this.confirmLeave(okFunction);
+  };
+
+  handleGoToDonate = (e: any) => {
+    const okFunction:Function = () => {
+      window.location.href = "/donate"
+    }
+    this.confirmLeave(okFunction);
+  };
+
+  confirmLeave = (okFunction: Function, cancelFunction?: Function) => {
+    confirm({
+      title: 'Leave Rune Simulator?',
+      content: 'You\'re about to leave this simulator. Are you sure?',
+      okText: 'Yes, leave simulator.',
+      okType: 'danger',
+      cancelText: 'No, stay here',
+      iconType:'exclamation-circle',
+      onOk() {
+        okFunction();
+      },
+      onCancel() {
+        (!!cancelFunction) && cancelFunction();
+      },
+    });
   };
 
   copyShareLink = () => {
@@ -492,7 +540,7 @@ class App extends React.PureComponent {
                   <Header
                     className="header fluid-header"
                     style={{
-                      paddingLeft: this.state.collapseSideMenu ? "0" : "50px"
+                      paddingLeft: this.state.collapseSideMenu ? "0" : "20px"
                     }}
                   >
                     <div className="logo" />
@@ -518,6 +566,10 @@ class App extends React.PureComponent {
                         <Icon type="menu" />
                         Menu
                       </Menu.Item>
+                      <Menu.Item key="0x" onClick={this.handleBackToDatabase}>
+                      <Icon type="appstore" />
+                        Database
+                      </Menu.Item>
                       <Menu.Item key="1x" onClick={this.handleSaveImage}>
                         <Icon type="file-image" />
                         Save as Image
@@ -525,6 +577,10 @@ class App extends React.PureComponent {
                       <Menu.Item key="2x" onClick={this.handleShareURL}>
                         <Icon type="share-alt" />
                         Share Link
+                      </Menu.Item>
+                      <Menu.Item key="3x" onClick={this.handleGoToDonate}>
+                        <Icon type="heart" theme="filled" />
+                        Donate
                       </Menu.Item>
                       {/*
                       <Menu.Item key="2">Rune Simulator</Menu.Item>

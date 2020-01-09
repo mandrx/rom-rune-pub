@@ -118,8 +118,17 @@ body {
     }
   }
   .job-tier-selection {
-    .ant-radio-button-wrapper > span{
+    .ant-radio-button-wrapper > span {
       font-size: 14px;
+    }
+
+    .ant-radio-button-wrapper {
+      @include media("<md") {
+        padding: 0 12px;
+        > span {
+          font-size: 12px;
+        }
+      }
     }
   }
 
@@ -377,7 +386,7 @@ body {
     height: 65px;
     padding: 0;
     //line-height: 65px;
-    .toggle-menu-button{
+    .toggle-menu-button {
       background-color: $primary-color;
     }
     @include media("<lg") {
@@ -608,9 +617,9 @@ body {
           color: #b0bec5;
         }
         b.value {
-          color:$primary-color;
+          color: $primary-color;
           line-height: 150px;
-        }        
+        }
       }
       .credit {
         font-size: 60px;
@@ -924,4 +933,7 @@ body {
   cursor: grabbing;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
+}
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item{
+  padding: 0 18px;
 }

@@ -35,7 +35,7 @@ export class RuneSimulator extends React.PureComponent<
   RuneSimulatorProps,
   RuneSimulatorState
 > {
-  private version: string = "2.01.10A";
+  private version: string = "2.01.10B";
   private dataLang = this.props.lang;
   private startPoint: number = 10000;
   private tier: number = 20000;
@@ -133,6 +133,9 @@ export class RuneSimulator extends React.PureComponent<
     // Check rune data version.
     this.isDataOutdated()
       .then(outdated => {
+        // Show what's new
+        this.showUpdateNotice()
+
         // Clear localdb if data is outdated.
         if (outdated) localForage.clear();
       })
@@ -160,6 +163,10 @@ export class RuneSimulator extends React.PureComponent<
             }, 500);
           });
       });
+  }
+
+  showUpdateNotice = () => {
+    console.log('Update data....')
   }
 
   changeJob = (jobId: number) => {

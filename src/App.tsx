@@ -269,7 +269,7 @@ class App extends React.PureComponent {
     const __saveImage = this.__saveImage;
     confirm({
       title: 'Save as Image',
-      content: 'This process may take a while. Save rune image now?',
+      content: 'Save rune image now? This process may take a while.',
       okText: 'Yes',
       cancelText: 'No',
       onOk() {

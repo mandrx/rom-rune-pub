@@ -1,4 +1,4 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Ragnarok Online M: Eternal Love rune simulator for [Romcodex](https://www.romcodex.com/runes/)
 
 ## Available Scripts
 
